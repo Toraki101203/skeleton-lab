@@ -1,7 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import type { UserProfile, UserRole } from '../types';
-import { auth } from '../lib/firebase';
-import { onAuthStateChanged, signOut as firebaseSignOut } from 'firebase/auth';
+import { supabase } from '../lib/supabase';
 
 interface AuthContextType {
     user: UserProfile | null;
@@ -17,21 +16,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // For real Firebase Auth
-        const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-            if (firebaseUser) {
-                // In a real app, we would fetch the user profile from Firestore here
-                // For now, we'll just mock it based on a local storage flag or similar if needed
-                // But for this dev phase, we rely on manual loginAs state mostly
+        // Supabase Auth Listener
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            if (session?.user) {
+                // In a real app, fetch profile from 'profiles' table
+                // For now, we'll try to determine role from metadata or fallback
+                const role = session.user.user_metadata.role as UserRole || 'user';
+
+                setUser({
+                    uid: session.user.id,
+                    email: session.user.email || '',
+                    role: role,
+                    name: session.user.user_metadata.full_name || 'User',
+                    avatarUrl: session.user.user_metadata.avatar_url
+                });
             } else {
-                // setUser(null);
+                // Only clear user if we are not in a "mock" session (optional, but for now strict sync)
+                // setUser(null); 
             }
             setLoading(false);
         });
-        return () => unsubscribe();
+
+        return () => subscription.unsubscribe();
     }, []);
 
-    // Mock Login for Development
+    // Mock Login for Development (Modified to set local state, or could be real Supabase login)
     const loginAs = async (role: UserRole) => {
         setLoading(true);
         // Simulate API call
@@ -50,7 +59,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const logout = async () => {
-        await firebaseSignOut(auth);
+        await supabase.auth.signOut();
         setUser(null);
     };
 
