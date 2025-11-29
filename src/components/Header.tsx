@@ -7,13 +7,13 @@ const Header = () => {
 
     return (
         <header className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 text-white">
-            <div className="flex items-center space-x-2">
+            <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
                 <Skull className="w-8 h-8" />
                 <div className="leading-tight">
                     <div className="text-[10px] opacity-80">Body Balance & Skeleton</div>
                     <div className="text-xl font-bold tracking-wider">Skeleton Lab.</div>
                 </div>
-            </div>
+            </Link>
 
             <nav className="hidden md:flex items-center space-x-6 text-sm opacity-80">
                 <Link to="/concept" className="hover:opacity-100">コンセプト</Link>
