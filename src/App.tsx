@@ -4,6 +4,9 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 import Home from './pages/Home';
 import Login from './pages/Login';
+import Concept from './pages/Concept';
+import Features from './pages/Features';
+import FAQ from './pages/FAQ';
 import DiagnosisWizard from './pages/user/DiagnosisWizard';
 import ClinicDashboard from './pages/clinic/Dashboard';
 import ProfileEditor from './pages/clinic/ProfileEditor';
@@ -21,6 +24,9 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/concept" element={<Concept />} />
+          <Route path="/features" element={<Features />} />
+          <Route path="/faq" element={<FAQ />} />
 
           {/* User Routes */}
           <Route element={<ProtectedRoute allowedRoles={['user', 'super_admin']} />}>

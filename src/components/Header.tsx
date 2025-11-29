@@ -6,7 +6,7 @@ const Header = () => {
     const { user, logout } = useAuth();
 
     return (
-        <header className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-6 py-4 text-white">
+        <header className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 text-white">
             <div className="flex items-center space-x-2">
                 <Skull className="w-8 h-8" />
                 <div className="leading-tight">
@@ -16,10 +16,10 @@ const Header = () => {
             </div>
 
             <nav className="hidden md:flex items-center space-x-6 text-sm opacity-80">
-                <a href="#" className="hover:opacity-100">コンセプト</a>
-                <a href="#" className="hover:opacity-100">特徴</a>
-                <a href="#" className="hover:opacity-100">掲載院一覧</a>
-                <a href="#" className="hover:opacity-100">よくある質問</a>
+                <Link to="/concept" className="hover:opacity-100">コンセプト</Link>
+                <Link to="/features" className="hover:opacity-100">特徴</Link>
+                <Link to="/search" className="hover:opacity-100">掲載院一覧</Link>
+                <Link to="/faq" className="hover:opacity-100">よくある質問</Link>
             </nav>
 
             <div className="flex items-center space-x-3">
