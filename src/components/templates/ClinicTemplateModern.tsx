@@ -1,4 +1,4 @@
-import { MapPin, Calendar, ArrowRight } from 'lucide-react';
+import { MapPin, ArrowRight } from 'lucide-react';
 import type { Clinic } from '../../types';
 
 interface Props {
