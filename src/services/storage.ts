@@ -1,12 +1,18 @@
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
 
 export const uploadImage = async (file: File, path: string): Promise<string> => {
     try {
-        const storageRef = ref(storage, path);
-        await uploadBytes(storageRef, file);
-        const downloadURL = await getDownloadURL(storageRef);
-        return downloadURL;
+        const { data, error } = await supabase.storage
+            .from('clinic-images')
+            .upload(path, file);
+
+        if (error) throw error;
+
+        const { data: publicUrlData } = supabase.storage
+            .from('clinic-images')
+            .getPublicUrl(data.path);
+
+        return publicUrlData.publicUrl;
     } catch (error) {
         console.error("Error uploading image:", error);
         throw error;
@@ -15,6 +21,8 @@ export const uploadImage = async (file: File, path: string): Promise<string> => 
 
 export const uploadClinicImage = async (clinicId: string, file: File): Promise<string> => {
     const timestamp = Date.now();
-    const path = `clinics/${clinicId}/${timestamp}_${file.name}`;
+    // Sanitize filename to avoid issues
+    const sanitizedName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
+    const path = `${clinicId}/${timestamp}_${sanitizedName}`;
     return uploadImage(file, path);
 };

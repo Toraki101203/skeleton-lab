@@ -36,6 +36,18 @@ export interface Clinic {
         address: string;
     };
     staffIds: string[];
+    templateId?: 'standard' | 'warm' | 'modern';
+    menuItems?: {
+        name: string;
+        price: number;
+        description?: string;
+        duration?: number;
+    }[];
+    staffInfo?: {
+        name: string;
+        imageUrl: string;
+        role?: string;
+    }[];
 }
 
 export interface DiagnosisLog {

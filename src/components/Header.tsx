@@ -40,6 +40,16 @@ const Header = () => {
                     </>
                 ) : (
                     <div className="flex items-center space-x-4">
+                        {user.role === 'super_admin' && (
+                            <Link to="/admin/call-center" className="text-sm hover:underline font-bold text-accent">
+                                管理パネル
+                            </Link>
+                        )}
+                        {user.role === 'clinic_admin' && (
+                            <Link to="/clinic/dashboard" className="text-sm hover:underline">
+                                管理画面
+                            </Link>
+                        )}
                         <span className="text-sm">{user.name}</span>
                         <button
                             onClick={logout}

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Search, MapPin, Clock, Star, Navigation } from 'lucide-react';
 import type { Clinic } from '../../types';
 import { isWithinInterval, parse, getDay } from 'date-fns';
-import { getAllClinics } from '../../services/firestore';
+import { getAllClinics } from '../../services/db';
 import PageLayout from '../../components/PageLayout';
 
 const PREFECTURES = [
@@ -42,7 +42,7 @@ const ClinicSearch = () => {
 
     const handleCurrentLocation = () => {
         if (!navigator.geolocation) {
-            alert("Geolocation is not supported by your browser");
+            alert("お使いのブラウザは位置情報をサポートしていません");
             return;
         }
         navigator.geolocation.getCurrentPosition(
@@ -54,7 +54,7 @@ const ClinicSearch = () => {
                 // Auto-sort by distance will happen in useEffect
             },
             () => {
-                alert("Unable to retrieve your location");
+                alert("位置情報を取得できませんでした");
             }
         );
     };
@@ -178,9 +178,9 @@ const ClinicSearch = () => {
             {/* Results List */}
             <div className="max-w-2xl mx-auto space-y-4 text-gray-800">
                 {loading ? (
-                    <div className="text-center py-10 text-white">読み込み中...</div>
+                    <div className="text-center py-10 text-gray-500">読み込み中...</div>
                 ) : filteredClinics.length === 0 ? (
-                    <div className="text-center py-10 text-white">
+                    <div className="text-center py-10 text-gray-500">
                         条件に一致するクリニックが見つかりませんでした。
                     </div>
                 ) : (

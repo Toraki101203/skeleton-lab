@@ -17,6 +17,8 @@ import StaffPage from './pages/clinic/StaffPage';
 import SolutionBuilder from './pages/clinic/SolutionBuilder';
 import DiagnosisResult from './pages/user/DiagnosisResult';
 
+import Register from './pages/Register';
+
 function App() {
   return (
     <AuthProvider>
@@ -27,6 +29,7 @@ function App() {
           <Route path="/concept" element={<Concept />} />
           <Route path="/features" element={<Features />} />
           <Route path="/faq" element={<FAQ />} />
+          <Route path="/register" element={<Register />} />
 
           {/* User Routes */}
           <Route element={<ProtectedRoute allowedRoles={['user', 'super_admin']} />}>
