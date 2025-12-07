@@ -13,8 +13,12 @@ import ProfileEditor from './pages/clinic/ProfileEditor';
 import CallCenter from './pages/admin/CallCenter';
 import ClinicSearch from './pages/user/ClinicSearch';
 import ClinicDetail from './pages/user/ClinicDetail';
-import StaffPage from './pages/clinic/StaffPage';
-import SolutionBuilder from './pages/clinic/SolutionBuilder';
+import StaffManagement from './pages/clinic/StaffManagement';
+import MenuManagement from './pages/clinic/MenuManagement';
+import ShiftManagement from './pages/clinic/ShiftManagement';
+import AttendanceManagement from './pages/clinic/AttendanceManagement';
+import ReservationManagement from './pages/clinic/ReservationManagement';
+import BookingWizard from './pages/booking/BookingWizard';
 import DiagnosisResult from './pages/user/DiagnosisResult';
 
 import Register from './pages/Register';
@@ -53,21 +57,25 @@ function App() {
           <Route path="/features" element={<Features />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/clinic/:id" element={<ClinicDetail />} />
+          <Route path="/booking" element={<BookingWizard />} />
 
           {/* User Routes */}
           <Route element={<ProtectedRoute allowedRoles={['user', 'super_admin']} />}>
             <Route path="/diagnosis" element={<DiagnosisWizard />} />
             <Route path="/diagnosis/result" element={<DiagnosisResult />} />
             <Route path="/search" element={<ClinicSearch />} />
-            <Route path="/clinic/:id" element={<ClinicDetail />} />
           </Route>
 
           {/* Clinic Admin Routes */}
           <Route element={<ProtectedRoute allowedRoles={['clinic_admin', 'super_admin']} />}>
             <Route path="/clinic/dashboard" element={<ClinicDashboard />} />
             <Route path="/clinic/profile" element={<ProfileEditor />} />
-            <Route path="/clinic/staff" element={<StaffPage />} />
-            <Route path="/clinic/solutions" element={<SolutionBuilder />} />
+            <Route path="/clinic/staff" element={<StaffManagement />} />
+            <Route path="/clinic/menu" element={<MenuManagement />} />
+            <Route path="/clinic/shifts" element={<ShiftManagement />} />
+            <Route path="/clinic/attendance" element={<AttendanceManagement />} />
+            <Route path="/clinic/reservations" element={<ReservationManagement />} />
           </Route>
 
           {/* Super Admin Routes */}

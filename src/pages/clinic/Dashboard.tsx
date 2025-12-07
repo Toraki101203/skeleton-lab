@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { LayoutDashboard, ArrowRight } from 'lucide-react';
+import { LayoutDashboard, ArrowRight, Users } from 'lucide-react';
 import PageLayout from '../../components/PageLayout';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -148,8 +148,8 @@ const ClinicDashboard = () => {
                         </div>
                     </Link>
 
-                    {/* Solution Builder */}
-                    <Link to="/clinic/solutions" className="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 relative overflow-hidden flex flex-col h-full">
+                    {/* Menu Management */}
+                    <Link to="/clinic/menu" className="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 relative overflow-hidden flex flex-col h-full">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
                         <div className="relative z-10 flex-1 flex flex-col">
                             <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-orange-600 transition-colors mt-2">メニュー・施術管理</h3>
@@ -162,18 +162,47 @@ const ClinicDashboard = () => {
                         </div>
                     </Link>
 
-                    {/* Booking Management (Placeholder) */}
-                    <div className="group bg-gray-50 rounded-2xl p-6 border border-gray-200 relative overflow-hidden opacity-70 cursor-not-allowed flex flex-col h-full">
+                    {/* Shift Management */}
+                    <Link to="/clinic/shifts" className="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 relative overflow-hidden flex flex-col h-full">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-purple-50 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
                         <div className="relative z-10 flex-1 flex flex-col">
-                            <h3 className="text-xl font-bold text-gray-500 mb-2 mt-2">予約管理</h3>
-                            <p className="text-gray-400 text-sm mb-6 leading-relaxed flex-1">
-                                予約の確認、変更、キャンセル対応などを行います。（準備中）
+                            <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-purple-600 transition-colors mt-2">シフト管理</h3>
+                            <p className="text-gray-500 text-sm mb-6 leading-relaxed flex-1">
+                                スタッフの出勤日や休日の設定、日ごとのシフト調整を行います。
                             </p>
-                            <div className="flex items-center text-gray-400 font-bold text-sm mt-auto">
-                                Coming Soon
+                            <div className="flex items-center text-purple-600 font-bold text-sm mt-auto">
+                                設定する <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                             </div>
                         </div>
-                    </div>
+                    </Link>
+
+                    {/* Attendance Management */}
+                    <Link to="/clinic/attendance" className="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 relative overflow-hidden flex flex-col h-full">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-pink-50 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
+                        <div className="relative z-10 flex-1 flex flex-col">
+                            <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-pink-600 transition-colors mt-2">勤怠管理</h3>
+                            <p className="text-gray-500 text-sm mb-6 leading-relaxed flex-1">
+                                スタッフの出勤・退勤記録の確認や修正を行います。
+                            </p>
+                            <div className="flex items-center text-pink-600 font-bold text-sm mt-auto">
+                                確認する <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                            </div>
+                        </div>
+                    </Link>
+
+                    {/* Reservation Management */}
+                    <Link to="/clinic/reservations" className="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 relative overflow-hidden flex flex-col h-full">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
+                        <div className="relative z-10 flex-1 flex flex-col">
+                            <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-indigo-600 transition-colors mt-2">予約管理</h3>
+                            <p className="text-gray-500 text-sm mb-6 leading-relaxed flex-1">
+                                予約の確認、変更、キャンセル対応などを行います。
+                            </p>
+                            <div className="flex items-center text-indigo-600 font-bold text-sm mt-auto">
+                                管理画面へ <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                            </div>
+                        </div>
+                    </Link>
                 </div>
             </div>
         </PageLayout>

@@ -5,6 +5,7 @@ import PageLayout from '../../components/PageLayout';
 import type { UserProfile } from '../../types';
 import { PREFECTURES, getCities } from '../../data/locations';
 import { supabase } from '../../lib/supabase';
+import { getAllClinics } from '../../services/db';
 
 const CallCenter = () => {
     const [users, setUsers] = useState<UserProfile[]>([]);
@@ -53,14 +54,11 @@ const CallCenter = () => {
     // Fetch Clinics
     useEffect(() => {
         const fetchClinics = async () => {
-            const { data, error } = await supabase
-                .from('clinics')
-                .select('*');
-
-            if (error) {
+            try {
+                const data = await getAllClinics();
+                setClinics(data);
+            } catch (error) {
                 console.error('Error fetching clinics:', error);
-            } else {
-                setClinics(data || []);
             }
         };
         fetchClinics();
@@ -318,7 +316,7 @@ const CallCenter = () => {
                                             <textarea
                                                 value={logNote}
                                                 onChange={(e) => setLogNote(e.target.value)}
-                                                className="w-full h-48 p-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all resize-none"
+                                                className="w-full h-48 p-4 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all resize-none text-gray-800"
                                                 placeholder="お問い合わせ内容や、ユーザーの特徴などを入力してください..."
                                             ></textarea>
                                         </div>
@@ -475,12 +473,13 @@ const CallCenter = () => {
                                                     onChange={(e) => setSelectedClinic(e.target.value)}
                                                     className="w-full bg-gray-50 border-2 border-gray-200 rounded-xl p-3 text-gray-800 focus:ring-4 focus:ring-primary/10 focus:border-primary/50 outline-none transition-all"
                                                 >
+                                                    <option value="">クリニックを選択してください</option>
                                                     {availableClinics.length > 0 ? (
                                                         availableClinics.map(clinic => (
                                                             <option key={clinic.id} value={clinic.id}>{clinic.name}</option>
                                                         ))
                                                     ) : (
-                                                        <option value="">このエリアにクリニックはありません</option>
+                                                        <option value="" disabled>このエリアにクリニックはありません</option>
                                                     )}
                                                 </select>
 
@@ -507,6 +506,7 @@ const CallCenter = () => {
                                             <ScheduleViewer
                                                 clinicId={selectedClinic}
                                                 date={bookingDate}
+                                                staffList={currentClinic?.staffInfo || []}
                                                 onSelectSlot={(start, end) => setSelectedSlot({ start, end })}
                                             />
                                         ) : (

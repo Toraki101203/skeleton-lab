@@ -23,12 +23,8 @@ Vercelは設定が簡単で、Vite製のReactアプリと相性が抜群です�
 4. **環境変数の設定 (重要)**
    - "Environment Variables" のセクションを開きます。
    - `.env` ファイルにある以下の値をすべてコピーして追加してください。
-     - `VITE_FIREBASE_API_KEY`
-     - `VITE_FIREBASE_AUTH_DOMAIN`
-     - `VITE_FIREBASE_PROJECT_ID`
-     - `VITE_FIREBASE_STORAGE_BUCKET`
-     - `VITE_FIREBASE_MESSAGING_SENDER_ID`
-     - `VITE_FIREBASE_APP_ID`
+     - `VITE_SUPABASE_URL`
+     - `VITE_SUPABASE_ANON_KEY`
 
 5. **デプロイ**
    - "Deploy" ボタンをクリックします。
