@@ -52,7 +52,12 @@ export const getClinic = async (clinicId: string): Promise<Clinic | null> => {
             staffIds: data.staff_ids,
             templateId: data.template_id || 'standard',
             menuItems: data.menu_items || [],
-            staffInfo: data.staff_info || []
+            staffInfo: data.staff_info || [],
+            directorInfo: data.director_info,
+            newsItems: data.news_items || [],
+            faqItems: data.faq_items || [],
+            accessDetails: data.access_details,
+            socialLinks: data.social_links
         } as Clinic;
     } catch (error) {
         console.error("Error getting clinic:", error);
@@ -74,6 +79,11 @@ export const updateClinicProfile = async (clinicId: string, data: Partial<Clinic
         if (data.templateId) dbData.template_id = data.templateId;
         if (data.menuItems) dbData.menu_items = data.menuItems;
         if (data.staffInfo) dbData.staff_info = data.staffInfo;
+        if (data.directorInfo) dbData.director_info = data.directorInfo;
+        if (data.newsItems) dbData.news_items = data.newsItems;
+        if (data.faqItems) dbData.faq_items = data.faqItems;
+        if (data.accessDetails) dbData.access_details = data.accessDetails;
+        if (data.socialLinks) dbData.social_links = data.socialLinks;
 
         const { error } = await supabase
             .from('clinics')
@@ -106,7 +116,12 @@ export const getAllClinics = async (): Promise<Clinic[]> => {
             staffIds: d.staff_ids,
             templateId: d.template_id || 'standard',
             menuItems: d.menu_items || [],
-            staffInfo: d.staff_info || []
+            staffInfo: d.staff_info || [],
+            directorInfo: d.director_info,
+            newsItems: d.news_items || [],
+            faqItems: d.faq_items || [],
+            accessDetails: d.access_details,
+            socialLinks: d.social_links
         })) as Clinic[];
     } catch (error) {
         console.error("Error fetching clinics:", error);
@@ -121,13 +136,18 @@ export const createBooking = async (booking: Omit<Booking, 'id'>) => {
         // Map camelCase to snake_case
         const dbData = {
             clinic_id: booking.clinicId,
-            user_id: booking.userId,
-            staff_id: booking.staffId,
+            user_id: booking.userId || null, // Handle null explicitly
+            staff_id: booking.staffId || null, // Handle null for Free nomination
             booked_by: booking.bookedBy,
             status: booking.status,
             start_time: booking.startTime,
             end_time: booking.endTime,
-            notes: booking.notes
+            notes: booking.notes,
+            guest_name: booking.guestName,
+            guest_contact: booking.guestContact,
+            guest_email: booking.guestEmail,
+            internal_memo: booking.internalMemo,
+            menu_item_id: booking.menuItemId
         };
 
         const { data, error } = await supabase
@@ -164,7 +184,12 @@ export const getClinicBookings = async (clinicId: string, startDate: Date, endDa
             status: b.status,
             startTime: new Date(b.start_time),
             endTime: new Date(b.end_time),
-            notes: b.notes
+            notes: b.notes,
+            guestName: b.guest_name,
+            guestContact: b.guest_contact,
+            guestEmail: b.guest_email,
+            internalMemo: b.internal_memo,
+            menuItemId: b.menu_item_id
         })) as Booking[];
     } catch (error) {
         console.error("Error fetching bookings:", error);
