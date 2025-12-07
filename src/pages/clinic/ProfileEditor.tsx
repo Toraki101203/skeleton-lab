@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, MapPin, Building, FileText, Clock, Layout, List, Plus, Trash2, Image as ImageIcon, Users, ExternalLink, UserCheck, MessageCircle, HelpCircle, Instagram, Twitter, Facebook } from 'lucide-react';
+import { Save, MapPin, Building, Clock, Layout, List, Plus, Trash2, Image as ImageIcon, Users, ExternalLink, UserCheck, MessageCircle, HelpCircle, Instagram, Twitter, Facebook } from 'lucide-react';
 import PageLayout from '../../components/PageLayout';
 import BusinessHoursEditor from '../../components/clinic/BusinessHoursEditor';
 import StaffEditorModal from '../../components/clinic/StaffEditorModal';

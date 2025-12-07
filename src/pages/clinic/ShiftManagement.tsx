@@ -4,7 +4,7 @@ import ShiftCalendar from '../../components/clinic/ShiftCalendar';
 import PageLayout from '../../components/PageLayout';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
-import type { Staff, Shift, Clinic } from '../../types';
+import type { Staff, Shift } from '../../types';
 
 const ShiftManagement = () => {
     const { user } = useAuth();

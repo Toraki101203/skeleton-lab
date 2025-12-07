@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Check, Clock, User } from 'lucide-react';
-import { Link, useSearchParams, useNavigate } from 'react-router-dom';
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, getDay, isBefore, startOfDay } from 'date-fns';
+import { Link, useSearchParams } from 'react-router-dom';
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isToday, getDay, isBefore, startOfDay } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import type { Clinic, Booking } from '../../types';
 import { getClinic, createBooking, getClinicBookings } from '../../services/db';
@@ -11,7 +11,6 @@ import { supabase } from '../../lib/supabase';
 const BookingWizard = () => {
     const [searchParams] = useSearchParams();
     const clinicId = searchParams.get('clinicId');
-    const navigate = useNavigate();
     const { user } = useAuth();
 
     const [clinic, setClinic] = useState<Clinic | null>(null);

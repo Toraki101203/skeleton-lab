@@ -27,7 +27,7 @@ const MOCK_RECORDS: AttendanceRecord[] = [
 ];
 
 const AttendanceManagement = () => {
-    const [currentDate, setCurrentDate] = useState(new Date());
+    const [currentDate] = useState(new Date());
     const [records, setRecords] = useState<AttendanceRecord[]>(MOCK_RECORDS);
     const [editingRecord, setEditingRecord] = useState<AttendanceRecord | null>(null);
 

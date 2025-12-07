@@ -20,7 +20,7 @@ const ReservationManagement = () => {
     const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
     const [staffList, setStaffList] = useState<Staff[]>([]);
     const [shifts, setShifts] = useState<Shift[]>([]);
-    const [clinicId, setClinicId] = useState<string | null>(null);
+
 
     // Fetch Database Data
     useEffect(() => {
@@ -36,7 +36,7 @@ const ReservationManagement = () => {
 
                 if (clinicError) throw clinicError;
                 if (clinicData) {
-                    setClinicId(clinicData.id);
+
                     if (clinicData.menu_items) setMenuItems(clinicData.menu_items);
 
                     // Add "Free" staff for unassigned bookings

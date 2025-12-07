@@ -12,7 +12,7 @@ interface Props {
     onSelectSlot: (start: Date, end: Date) => void;
 }
 
-const ScheduleViewer: React.FC<Props> = ({ clinicId, date, staffList = [], onSelectSlot }) => {
+const ScheduleViewer: React.FC<Props> = ({ clinicId, date, staffList = [] }) => {
     const { bookings, loading } = useRealtimeBookings(clinicId, date);
     const { user } = useAuth();
 
@@ -67,7 +67,7 @@ const ScheduleViewer: React.FC<Props> = ({ clinicId, date, staffList = [], onSel
     };
 
     const getBookingForSlot = (slotStart: Date) => {
-        const slotEnd = addMinutes(slotStart, 30);
+
         return bookings.find(b => {
             return (
                 (isWithinInterval(slotStart, { start: b.startTime, end: b.endTime }) && slotStart < b.endTime)

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+// React import removed as useState is unused
 import { ChevronLeft, ChevronRight, User } from 'lucide-react';
 import type { Staff, Shift } from '../../types';
 

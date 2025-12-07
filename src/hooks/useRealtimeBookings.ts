@@ -8,6 +8,11 @@ export const useRealtimeBookings = (clinicId: string, date: Date) => {
     const [loading, setLoading] = useState(true);
     const { showToast } = useToast();
 
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
     useEffect(() => {
         let isMounted = true;
         const fetchInitialData = async () => {
@@ -17,8 +22,8 @@ export const useRealtimeBookings = (clinicId: string, date: Date) => {
                     .from('bookings')
                     .select('*')
                     .eq('clinic_id', clinicId)
-                    .gte('start_time', startDate.toISOString())
-                    .lte('start_time', endDate.toISOString());
+                    .gte('start_time', startOfDay.toISOString())
+                    .lte('start_time', endOfDay.toISOString());
 
                 if (error) throw error;
 
@@ -70,7 +75,7 @@ export const useRealtimeBookings = (clinicId: string, date: Date) => {
                         const bookingTime = new Date(newB.start_time);
 
                         // Only add if it belongs to current day view
-                        if (bookingTime >= startDate && bookingTime <= endDate) {
+                        if (bookingTime >= startOfDay && bookingTime <= endOfDay) {
                             const newBooking: Booking = {
                                 id: newB.id,
                                 clinicId: newB.clinic_id,

@@ -3,7 +3,7 @@ import { Plus, Trash2, Edit2, User, Clock, Check } from 'lucide-react';
 import PageLayout from '../../components/PageLayout';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
-import type { Clinic, Staff, MenuItem, BusinessHours } from '../../types';
+import type { Staff, MenuItem, BusinessHours } from '../../types';
 import StaffEditorModal from '../../components/clinic/StaffEditorModal';
 
 const INITIAL_HOURS: BusinessHours = { start: '09:00', end: '20:00', isClosed: false };
@@ -19,9 +19,8 @@ const INITIAL_WEEK = {
 
 const StaffManagement = () => {
     const { user } = useAuth();
-    const [loading, setLoading] = useState(false);
+
     const [fetching, setFetching] = useState(true);
-    const [clinic, setClinic] = useState<Clinic | null>(null);
     const [staffList, setStaffList] = useState<Staff[]>([]);
     const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
 
@@ -43,7 +42,7 @@ const StaffManagement = () => {
                 if (error) throw error;
 
                 if (data) {
-                    setClinic(data);
+
 
                     // 1. Ensure menu items have IDs (Migration)
                     let loadedMenuItems = data.menu_items || [];
@@ -86,7 +85,7 @@ const StaffManagement = () => {
 
     const saveData = async (newStaffList: Staff[]) => {
         if (!user?.uid) return;
-        setLoading(true);
+
         try {
             const { error } = await supabase
                 .from('clinics')
@@ -104,7 +103,7 @@ const StaffManagement = () => {
             console.error('Error saving data:', err);
             alert('保存に失敗しました: ' + err.message);
         } finally {
-            setLoading(false);
+
         }
     };
 

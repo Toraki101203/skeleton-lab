@@ -3,7 +3,7 @@ import { Plus, Trash2, Edit2, X, Clock } from 'lucide-react';
 import PageLayout from '../../components/PageLayout';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
-import type { Clinic } from '../../types';
+
 
 interface MenuItem {
     id: string;
@@ -20,9 +20,8 @@ const DEFAULT_CATEGORIES = ['鍼灸院', '整骨院', '接骨院', '一般', '�
 
 const MenuManagement = () => {
     const { user } = useAuth();
-    const [loading, setLoading] = useState(false);
+
     const [fetching, setFetching] = useState(true);
-    const [clinic, setClinic] = useState<Clinic | null>(null);
 
     // Data State
     const [categories, setCategories] = useState<string[]>([]);
@@ -55,7 +54,7 @@ const MenuManagement = () => {
                     const loadedCategories = (data.menu_categories && data.menu_categories.length > 0) ? data.menu_categories : DEFAULT_CATEGORIES;
                     const loadedItems = data.menu_items || [];
 
-                    setClinic(data);
+
                     setCategories(loadedCategories);
                     setMenuItems(loadedItems);
 
@@ -75,7 +74,7 @@ const MenuManagement = () => {
     // Save Data Helper
     const saveData = async (newCategories: string[], newItems: MenuItem[]) => {
         if (!user?.uid) return;
-        setLoading(true);
+
         try {
             const { error } = await supabase
                 .from('clinics')
@@ -94,7 +93,7 @@ const MenuManagement = () => {
             console.error('Error saving data:', err);
             alert('保存に失敗しました: ' + err.message);
         } finally {
-            setLoading(false);
+
         }
     };
 

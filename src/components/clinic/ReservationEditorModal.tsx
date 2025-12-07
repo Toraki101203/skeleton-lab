@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Calendar, Clock, User, Check, AlertCircle } from 'lucide-react';
+import { X, Calendar, User, Check, AlertCircle } from 'lucide-react';
 import type { Reservation, Staff, MenuItem, Shift } from '../../types';
 
 interface ReservationEditorModalProps {
