@@ -14,6 +14,7 @@ const DAY_MAP: Record<string, string> = {
 
 const MENU_ITEMS = [
     { id: 'about', label: '当院について' },
+    { id: 'news', label: 'お知らせ' },
     { id: 'menu', label: 'メニュー' },
     { id: 'staff', label: 'スタッフ紹介' },
     { id: 'access', label: 'アクセス' },
@@ -169,10 +170,34 @@ const ClinicTemplateStandard: React.FC<Props> = ({ clinic, onBooking }) => {
                 </div>
             </section>
 
+            {/* News Section */}
+            {clinic.newsItems && clinic.newsItems.length > 0 && (
+                <section id="news" className="py-24 px-4 sm:px-6 bg-gray-50">
+                    <div className="max-w-4xl mx-auto">
+                        <div className="text-center mb-16">
+                            <span className="text-blue-600 font-bold tracking-widest uppercase text-sm">News</span>
+                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">お知らせ</h2>
+                            <div className="w-16 h-1 bg-blue-600 mx-auto mt-6"></div>
+                        </div>
+                        <div className="space-y-4">
+                            {clinic.newsItems.map((news, i) => (
+                                <div key={i} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4 items-start md:items-center">
+                                    <div className="text-gray-500 font-mono text-sm whitespace-nowrap">{news.date.split('T')[0]}</div>
+                                    <div className="flex-1">
+                                        <h3 className="font-bold text-gray-800 mb-1">{news.title}</h3>
+                                        <p className="text-gray-600 text-sm whitespace-pre-wrap">{news.content}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
+
             {/* Menu Section */}
             {
                 clinic.menuItems && clinic.menuItems.length > 0 && (
-                    <section id="menu" className="py-24 px-4 sm:px-6 bg-gray-50">
+                    <section id="menu" className="py-24 px-4 sm:px-6 bg-white">
                         <div className="max-w-4xl mx-auto">
                             <div className="text-center mb-16">
                                 <span className="text-blue-600 font-bold tracking-widest uppercase text-sm">Menu</span>
@@ -321,7 +346,9 @@ const ClinicTemplateStandard: React.FC<Props> = ({ clinic, onBooking }) => {
             </section>
 
             {/* Footer */}
-            <Footer />
+            <div className="bg-gray-900">
+                <Footer />
+            </div>
 
             {/* Sticky Booking Button (Mobile Only) */}
             <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-40">
