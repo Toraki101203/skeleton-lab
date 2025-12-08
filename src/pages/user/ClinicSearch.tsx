@@ -138,73 +138,74 @@ const ClinicSearch = () => {
             <div className="max-w-7xl mx-auto space-y-8">
                 {/* Header / Search Bar */}
                 <div className="bg-white/80 backdrop-blur-xl shadow-lg rounded-2xl p-6 border border-white/20 relative z-30">
-                    <div className="grid md:grid-cols-[1fr,auto] gap-4 mb-4">
-                        <div className="relative flex-1 group">
+                    <div className="flex flex-col lg:flex-row gap-4">
+                        {/* Search Input - Expands to fill available space */}
+                        <div className="relative flex-1 group min-w-[300px]">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-primary transition-colors" />
                             <input
                                 type="text"
                                 placeholder="クリニック名・キーワードで検索"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-12 pr-4 py-4 border-2 border-gray-100 rounded-xl outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all bg-gray-50/50 hover:bg-white focus:bg-white"
+                                className="w-full pl-12 pr-4 py-3 border-2 border-gray-100 rounded-xl outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all bg-gray-50/50 hover:bg-white focus:bg-white text-gray-800 placeholder-gray-400"
                             />
                         </div>
-                        <div className="flex gap-2">
+
+                        {/* Controls Group - Keeps buttons together */}
+                        <div className="flex flex-wrap items-center gap-2 shrink-0">
                             <select
                                 value={selectedPrefecture}
                                 onChange={(e) => setSelectedPrefecture(e.target.value)}
-                                className="px-6 py-4 border-2 border-gray-100 rounded-xl outline-none focus:border-primary bg-white text-gray-700 font-bold min-w-[140px] appearance-none cursor-pointer hover:bg-gray-50 transition-colors"
+                                className="px-4 py-3 border-2 border-gray-100 rounded-xl outline-none focus:border-primary bg-white text-gray-800 font-bold appearance-none cursor-pointer hover:bg-gray-50 transition-colors"
                             >
                                 <option value="">都道府県</option>
                                 {PREFECTURES.map(p => (
                                     <option key={p} value={p}>{p}</option>
                                 ))}
                             </select>
-                        </div>
-                    </div>
 
-                    <div className="flex flex-wrap items-center gap-3">
-                        <button
-                            onClick={handleCurrentLocation}
-                            className={`px-5 py-2.5 rounded-full border-2 font-bold transition-all flex items-center shadow-sm active:scale-95 ${userLocation
-                                ? 'bg-blue-50 border-primary text-primary'
+                            <button
+                                onClick={handleCurrentLocation}
+                                className={`px-4 py-3 rounded-xl border-2 font-bold transition-all flex items-center shadow-sm active:scale-95 whitespace-nowrap ${userLocation
+                                    ? 'bg-blue-50 border-primary text-primary'
+                                    : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                                    }`}
+                            >
+                                <Navigation className={`w-4 h-4 mr-2 ${userLocation ? 'animate-pulse' : ''}`} />
+                                {userLocation ? '周辺表示中' : '現在地'}
+                            </button>
+
+                            {userLocation && (
+                                <div className="flex bg-white rounded-xl border-2 border-primary overflow-hidden shadow-sm h-[50px] items-center">
+                                    {[5, 10, 15].map(radius => (
+                                        <button
+                                            key={radius}
+                                            onClick={() => setSearchRadius(radius)}
+                                            className={`px-3 py-3 text-sm font-bold transition-colors h-full flex items-center ${searchRadius === radius
+                                                ? 'bg-primary text-white'
+                                                : 'text-gray-600 hover:bg-gray-50'
+                                                }`}
+                                        >
+                                            {radius}km
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+
+                            <label className={`flex items-center px-4 py-3 rounded-xl border-2 cursor-pointer transition-all font-bold select-none whitespace-nowrap ${filterOpenNow
+                                ? 'bg-green-50 border-green-500 text-green-600'
                                 : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
-                                }`}
-                        >
-                            <Navigation className={`w-4 h-4 mr-2 ${userLocation ? 'animate-pulse' : ''}`} />
-                            {userLocation ? '現在地周辺を表示中' : '現在地から探す'}
-                        </button>
-
-                        {userLocation && (
-                            <div className="flex bg-white rounded-full border-2 border-primary overflow-hidden shadow-sm">
-                                {[5, 10, 15].map(radius => (
-                                    <button
-                                        key={radius}
-                                        onClick={() => setSearchRadius(radius)}
-                                        className={`px-4 py-2 text-sm font-bold transition-colors ${searchRadius === radius
-                                            ? 'bg-primary text-white'
-                                            : 'text-gray-600 hover:border-gray-300 hover:bg-gray-50'
-                                            }`}
-                                    >
-                                        {radius}km
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-
-                        <label className={`flex items-center px-5 py-2.5 rounded-full border-2 cursor-pointer transition-all font-bold select-none ${filterOpenNow
-                            ? 'bg-green-50 border-green-500 text-green-600'
-                            : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
-                            }`}>
-                            <input
-                                type="checkbox"
-                                checked={filterOpenNow}
-                                onChange={(e) => setFilterOpenNow(e.target.checked)}
-                                className="hidden"
-                            />
-                            <Clock className="w-4 h-4 mr-2" />
-                            営業中のみ
-                        </label>
+                                }`}>
+                                <input
+                                    type="checkbox"
+                                    checked={filterOpenNow}
+                                    onChange={(e) => setFilterOpenNow(e.target.checked)}
+                                    className="hidden"
+                                />
+                                <Clock className="w-4 h-4 mr-2" />
+                                営業中
+                            </label>
+                        </div>
                     </div>
                 </div>
 
@@ -309,7 +310,7 @@ const ClinicSearch = () => {
                     </div>
                 )}
             </div>
-        </PageLayout >
+        </PageLayout>
     );
 };
 
