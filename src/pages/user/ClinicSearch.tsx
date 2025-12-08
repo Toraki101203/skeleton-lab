@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, MapPin, Clock, Star, Navigation } from 'lucide-react';
+import { Search, MapPin, Clock, Navigation } from 'lucide-react';
 import type { Clinic } from '../../types';
 import { isWithinInterval, parse, getDay } from 'date-fns';
 import { getAllClinics } from '../../services/db';
@@ -274,8 +274,7 @@ const ClinicSearch = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {filteredClinics.map(clinic => {
                             const distance = userLocation ? calculateDistance(userLocation.lat, userLocation.lng, clinic.location.lat, clinic.location.lng) : null;
-                            const rating = 4.8; // Mock rating
-                            const reviewCount = 120; // Mock reviews
+
 
                             return (
                                 <Link to={`/clinic/${clinic.id}`} key={clinic.id} className="group bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full relative">
@@ -298,13 +297,7 @@ const ClinicSearch = () => {
                                             )}
                                         </div>
 
-                                        <div className="absolute top-4 right-4 z-20">
-                                            <div className="bg-white text-gray-800 px-3 py-1.5 rounded-lg text-xs font-bold shadow-lg flex items-center gap-1">
-                                                <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                                                <span>{rating}</span>
-                                                <span className="text-gray-400 font-normal">({reviewCount})</span>
-                                            </div>
-                                        </div>
+
 
                                         {/* Open Stauts Badge */}
                                         <div className="absolute bottom-4 left-4 z-20">
