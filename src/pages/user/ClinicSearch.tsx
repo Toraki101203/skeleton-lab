@@ -192,13 +192,14 @@ const ClinicSearch = () => {
                                 ))}
                             </select>
 
-                            {selectedPrefecture && cities.length > 0 && (
+                            {selectedPrefecture && (
                                 <select
                                     value={selectedCity}
                                     onChange={(e) => setSelectedCity(e.target.value)}
-                                    className="px-4 py-3 border-2 border-gray-100 rounded-xl outline-none focus:border-primary bg-white text-gray-800 font-bold appearance-none cursor-pointer hover:bg-gray-50 transition-colors animate-in fade-in slide-in-from-left-2 duration-300"
+                                    disabled={cities.length === 0}
+                                    className="px-4 py-3 border-2 border-gray-100 rounded-xl outline-none focus:border-primary bg-white text-gray-800 font-bold appearance-none cursor-pointer hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    <option value="">市区町村</option>
+                                    <option value="">{cities.length > 0 ? "市区町村" : "読み込み中..."}</option>
                                     {cities.map(c => (
                                         <option key={c} value={c}>{c}</option>
                                     ))}
