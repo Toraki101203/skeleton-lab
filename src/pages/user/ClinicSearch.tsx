@@ -19,6 +19,8 @@ const PREFECTURES = [
 const ClinicSearch = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedPrefecture, setSelectedPrefecture] = useState('');
+    const [selectedCity, setSelectedCity] = useState('');
+    const [cities, setCities] = useState<string[]>([]);
     const [filterOpenNow, setFilterOpenNow] = useState(false);
     const [searchRadius, setSearchRadius] = useState(15); // Default 15km
     const [clinics, setClinics] = useState<Clinic[]>([]);
@@ -40,6 +42,27 @@ const ClinicSearch = () => {
         };
         fetchClinics();
     }, []);
+
+    // Fetch cities when prefecture changes
+    useEffect(() => {
+        const fetchCities = async () => {
+            if (!selectedPrefecture) {
+                setCities([]);
+                setSelectedCity('');
+                return;
+            }
+            try {
+                const response = await fetch(`https://geolonia.github.io/japanese-addresses/api/ja/${selectedPrefecture}.json`);
+                const data = await response.json();
+                setCities(data);
+                setSelectedCity(''); // Reset city when prefecture changes
+            } catch (error) {
+                console.error("Failed to fetch cities", error);
+                setCities([]);
+            }
+        };
+        fetchCities();
+    }, [selectedPrefecture]);
 
     const handleCurrentLocation = () => {
         if (!navigator.geolocation) {
@@ -93,6 +116,11 @@ const ClinicSearch = () => {
             result = result.filter(c => c.location.address.includes(selectedPrefecture));
         }
 
+        // Filter by City
+        if (selectedCity) {
+            result = result.filter(c => c.location.address.includes(selectedCity));
+        }
+
         // Filter by Open Now
         if (filterOpenNow) {
             const now = new Date();
@@ -131,7 +159,7 @@ const ClinicSearch = () => {
         }
 
         setFilteredClinics(result);
-    }, [searchTerm, selectedPrefecture, filterOpenNow, userLocation, clinics, searchRadius]); // Added searchRadius dependency
+    }, [searchTerm, selectedPrefecture, selectedCity, filterOpenNow, userLocation, clinics, searchRadius]); // Added selectedCity dependency
 
     return (
         <PageLayout>
@@ -163,6 +191,19 @@ const ClinicSearch = () => {
                                     <option key={p} value={p}>{p}</option>
                                 ))}
                             </select>
+
+                            {selectedPrefecture && cities.length > 0 && (
+                                <select
+                                    value={selectedCity}
+                                    onChange={(e) => setSelectedCity(e.target.value)}
+                                    className="px-4 py-3 border-2 border-gray-100 rounded-xl outline-none focus:border-primary bg-white text-gray-800 font-bold appearance-none cursor-pointer hover:bg-gray-50 transition-colors animate-in fade-in slide-in-from-left-2 duration-300"
+                                >
+                                    <option value="">市区町村</option>
+                                    {cities.map(c => (
+                                        <option key={c} value={c}>{c}</option>
+                                    ))}
+                                </select>
+                            )}
 
                             <button
                                 onClick={handleCurrentLocation}
