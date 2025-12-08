@@ -20,6 +20,7 @@ const ClinicSearch = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedPrefecture, setSelectedPrefecture] = useState('');
     const [filterOpenNow, setFilterOpenNow] = useState(false);
+    const [searchRadius, setSearchRadius] = useState(15); // Default 15km
     const [clinics, setClinics] = useState<Clinic[]>([]);
     const [filteredClinics, setFilteredClinics] = useState<Clinic[]>([]);
     const [loading, setLoading] = useState(true);
@@ -108,17 +109,29 @@ const ClinicSearch = () => {
             });
         }
 
-        // Sort by Distance if User Location is available
+        // Sort by Distance and Filter by Radius if User Location is available
         if (userLocation) {
-            result.sort((a, b) => {
-                const distA = calculateDistance(userLocation.lat, userLocation.lng, a.location.lat, a.location.lng);
-                const distB = calculateDistance(userLocation.lat, userLocation.lng, b.location.lat, b.location.lng);
-                return distA - distB;
+            // First calculate distance for all
+            const clinicsWithDist = result.map(c => ({
+                ...c,
+                distance: calculateDistance(userLocation.lat, userLocation.lng, c.location.lat, c.location.lng)
+            }));
+
+            // Filter by Radius
+            const withinRadius = clinicsWithDist.filter(c => c.distance <= searchRadius);
+
+            // Sort by Distance
+            withinRadius.sort((a, b) => a.distance - b.distance);
+
+            // Map back to Clinic type (discarding temporary distance property if needed, but we used local var)
+            result = withinRadius.map(c => {
+                const { distance, ...rest } = c;
+                return rest;
             });
         }
 
         setFilteredClinics(result);
-    }, [searchTerm, selectedPrefecture, filterOpenNow, userLocation, clinics]);
+    }, [searchTerm, selectedPrefecture, filterOpenNow, userLocation, clinics, searchRadius]); // Added searchRadius dependency
 
     return (
         <PageLayout>
@@ -161,6 +174,23 @@ const ClinicSearch = () => {
                             <Navigation className={`w-4 h-4 mr-2 ${userLocation ? 'animate-pulse' : ''}`} />
                             {userLocation ? '現在地周辺を表示中' : '現在地から探す'}
                         </button>
+
+                        {userLocation && (
+                            <div className="flex bg-white rounded-full border-2 border-primary overflow-hidden shadow-sm">
+                                {[5, 10, 15].map(radius => (
+                                    <button
+                                        key={radius}
+                                        onClick={() => setSearchRadius(radius)}
+                                        className={`px-4 py-2 text-sm font-bold transition-colors ${searchRadius === radius
+                                            ? 'bg-primary text-white'
+                                            : 'text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                                            }`}
+                                    >
+                                        {radius}km
+                                    </button>
+                                ))}
+                            </div>
+                        )}
 
                         <label className={`flex items-center px-5 py-2.5 rounded-full border-2 cursor-pointer transition-all font-bold select-none ${filterOpenNow
                             ? 'bg-green-50 border-green-500 text-green-600'
@@ -279,7 +309,7 @@ const ClinicSearch = () => {
                     </div>
                 )}
             </div>
-        </PageLayout>
+        </PageLayout >
     );
 };
 
