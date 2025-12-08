@@ -487,15 +487,21 @@ const ProfileEditor = () => {
                                             <button onClick={() => removeMenuItem(index)} className="absolute top-2 right-2 p-1 text-gray-400 hover:text-red-500 transition-colors">
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
-                                            <div className="grid grid-cols-3 gap-3 mb-2">
-                                                <div className="col-span-2">
-                                                    <input type="text" value={item.name} onChange={(e) => updateMenuItem(index, 'name', e.target.value)} className="w-full p-2 border border-gray-200 rounded-lg text-sm text-gray-900 bg-white" placeholder="メニュー名" />
+                                            <div className="mb-2">
+                                                <input type="text" value={item.name} onChange={(e) => updateMenuItem(index, 'name', e.target.value)} className="w-full p-2 border border-gray-200 rounded-lg text-sm text-gray-900 bg-white" placeholder="メニュー名" />
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-3 mb-2">
+                                                <div className="relative">
+                                                    <span className="absolute left-2 top-2 text-gray-400 text-xs">¥</span>
+                                                    <input type="number" value={item.price} onChange={(e) => updateMenuItem(index, 'price', parseInt(e.target.value) || 0)} className="w-full pl-6 p-2 border border-gray-200 rounded-lg text-sm text-gray-900 bg-white" placeholder="料金" />
                                                 </div>
-                                                <div>
-                                                    <input type="number" value={item.price} onChange={(e) => updateMenuItem(index, 'price', parseInt(e.target.value) || 0)} className="w-full p-2 border border-gray-200 rounded-lg text-sm text-gray-900 bg-white" placeholder="料金" />
+                                                <div className="relative">
+                                                    <Clock className="absolute left-2 top-2.5 text-gray-400 w-3 h-3" />
+                                                    <input type="number" value={item.duration} onChange={(e) => updateMenuItem(index, 'duration', parseInt(e.target.value) || 0)} className="w-full pl-7 p-2 border border-gray-200 rounded-lg text-sm text-gray-900 bg-white" placeholder="分" />
+                                                    <span className="absolute right-2 top-2 text-gray-400 text-xs">分</span>
                                                 </div>
                                             </div>
-                                            <input type="text" value={item.description} onChange={(e) => updateMenuItem(index, 'description', e.target.value)} className="w-full p-2 border border-gray-200 rounded-lg text-sm text-gray-900 bg-white" placeholder="説明" />
+                                            <input type="text" value={item.description} onChange={(e) => updateMenuItem(index, 'description', e.target.value)} className="w-full p-2 border border-gray-200 rounded-lg text-sm text-gray-900 bg-white" placeholder="説明 (任意)" />
                                         </div>
                                     ))}
                                 </div>
