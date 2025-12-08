@@ -280,7 +280,7 @@ const ClinicSearch = () => {
                             return (
                                 <Link to={`/clinic/${clinic.id}`} key={clinic.id} className="group bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full relative">
                                     {/* Image Section */}
-                                    <div className="relative aspect-[4/3] overflow-hidden">
+                                    <div className="relative aspect-video overflow-hidden">
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10 opactiy-60" />
                                         <img
                                             src={clinic.images[0] || 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=800'}
@@ -332,9 +332,7 @@ const ClinicSearch = () => {
                                                     {cat}
                                                 </span>
                                             ))}
-                                            {(!clinic.menuCategories || clinic.menuCategories.length === 0) && (
-                                                <span className="text-xs text-gray-400">タグなし</span>
-                                            )}
+
                                             {clinic.menuCategories && clinic.menuCategories.length > 3 && (
                                                 <span className="px-2 py-1 bg-gray-50 text-gray-400 text-xs rounded-md">+{clinic.menuCategories.length - 3}</span>
                                             )}
