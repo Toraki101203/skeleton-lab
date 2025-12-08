@@ -4,6 +4,7 @@ import { LayoutDashboard, ArrowRight } from 'lucide-react';
 import PageLayout from '../../components/PageLayout';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
+import { getClinicBookings } from '../../services/db';
 
 const ClinicDashboard = () => {
     const { user } = useAuth();
@@ -13,7 +14,8 @@ const ClinicDashboard = () => {
         avgWaitTime: 0,
         monthlyPv: 0,
         todayBookingsDiff: 0,
-        monthlyPvDiff: 0
+        monthlyPvDiff: 0,
+        availableSlots: 0 // New field
     });
 
     useEffect(() => {
@@ -23,22 +25,94 @@ const ClinicDashboard = () => {
             // 1. Get Clinic Info
             const { data: clinic } = await supabase
                 .from('clinics')
-                .select('id, name')
+                .select('*')
                 .eq('owner_uid', user.uid)
                 .single();
 
             if (clinic) {
                 setClinicName(clinic.name);
                 const clinicId = clinic.id;
+                const today = new Date().toISOString().split('T')[0];
 
                 // 2. Get Today's Bookings
-                const today = new Date().toISOString().split('T')[0];
                 const { count: todayCount } = await supabase
                     .from('bookings')
                     .select('*', { count: 'exact', head: true })
                     .eq('clinic_id', clinicId)
                     .gte('start_time', `${today}T00:00:00`)
                     .lte('start_time', `${today}T23:59:59`);
+
+
+                // 3. Calculate Available Slots
+                let availableSlotsCount = 0;
+
+                // Fetch shifts for today
+                const { data: shifts } = await supabase
+                    .from('shifts')
+                    .select('*')
+                    .eq('clinic_id', clinicId)
+                    .eq('date', today);
+
+                // Fetch full bookings for calculation
+                const bookings = await getClinicBookings(
+                    clinicId,
+                    new Date(`${today}T00:00:00`),
+                    new Date(`${today}T23:59:59`)
+                );
+
+                // Simple Slot Calc: check every hour from 9:00 to 18:00 (or business hours)
+                // For each staff on shift, add 1 for each hour they are working AND not booked
+                const hours = Array.from({ length: 12 }, (_, i) => i + 9); // 9 to 20
+
+                // We need the staff list really, but let's assume shifts cover active staff
+                // Or better, iterate shifts
+                if (shifts) {
+                    shifts.forEach(shift => {
+                        if (shift.isHoliday) return;
+
+                        // Parse shift times
+                        const shiftStart = parseInt(shift.startTime.split(':')[0]);
+                        const shiftEnd = parseInt(shift.endTime.split(':')[0]);
+
+                        hours.forEach(h => {
+                            if (h >= shiftStart && h < shiftEnd) {
+                                // Check if this staff is booked at this hour
+                                const isBooked = bookings.some(b => {
+                                    if (b.staffId !== shift.staffId) return false;
+                                    const bStart = b.startTime.getHours();
+                                    return bStart === h;
+                                });
+                                if (!isBooked) availableSlotsCount++;
+                            }
+                        });
+                    });
+                } else if (clinic.staff_info) {
+                    // If no shifts defined for today, fallback to default schedule?
+                    // For now let's rely on shifts as per plan, or maybe default schedule is too complex here
+                    // If strict "available slots needs shifts", then 0 is correct if no shifts
+                    // But maybe we should check default schedule for robustness
+                    const dayKey = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][new Date().getDay()];
+                    clinic.staff_info.forEach((staff: any) => {
+                        const schedule = staff.defaultSchedule?.[dayKey];
+                        if (schedule && !schedule.isClosed) {
+                            const start = parseInt(schedule.start.split(':')[0]);
+                            const end = parseInt(schedule.end.split(':')[0]);
+                            hours.forEach(h => {
+                                if (h >= start && h < end) {
+                                    const isBooked = bookings.some(b => {
+                                        // Booking might not have staffId if free, but here we check specific staff slot
+                                        // If booking is "free" (no staff), it consumes SOMEONE'S slot.
+                                        // This logic is tricky. "Free" booking should reduce total capacity.
+                                        // For now, let's assume bookings have staffId assigned or we check "any" slot
+                                        return (b.staffId === staff.id) && (b.startTime.getHours() === h);
+                                    });
+                                    if (!isBooked) availableSlotsCount++;
+                                }
+                            });
+                        }
+                    });
+                }
+
 
                 // Mock Diff for now (or fetch yesterday)
                 const todayDiff = 2;
@@ -62,7 +136,8 @@ const ClinicDashboard = () => {
                     avgWaitTime: avgWait,
                     monthlyPv: totalPv,
                     todayBookingsDiff: todayDiff,
-                    monthlyPvDiff: 12 // Mock
+                    monthlyPvDiff: 12, // Mock
+                    availableSlots: availableSlotsCount
                 });
             }
         };
@@ -96,7 +171,10 @@ const ClinicDashboard = () => {
                             <span className="text-sm font-medium opacity-80">本日の予約</span>
                         </div>
                         <div className="text-4xl font-bold mb-1">{stats.todayBookings}<span className="text-lg font-normal opacity-80 ml-1">件</span></div>
-                        <div className="text-xs opacity-70">前日比 +{stats.todayBookingsDiff}件</div>
+                        <div className="flex justify-between items-center text-xs opacity-70 mt-2 border-t border-white/20 pt-2">
+                            <span>前日比 +{stats.todayBookingsDiff}件</span>
+                            <span className="font-bold bg-white/20 px-2 py-0.5 rounded">空き枠: {stats.availableSlots}</span>
+                        </div>
                     </div>
                     <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
                         <div className="flex items-center justify-end mb-4">
