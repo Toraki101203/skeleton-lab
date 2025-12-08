@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import type { Clinic, Staff, Booking, AuditLog } from '../types';
+import type { Clinic, Booking, AuditLog } from '../types';
 
 // --- User & Diagnosis ---
 
