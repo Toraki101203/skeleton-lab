@@ -92,6 +92,7 @@ export interface Clinic {
         facebook?: string;
         website?: string;
     };
+    status?: 'pending' | 'active' | 'suspended';
 }
 
 export interface DiagnosisLog {
@@ -115,8 +116,8 @@ export interface Booking {
     clinicId: string;
     userId?: string; // Optional for guest bookings
     staffId: string | null; // Nullable for "Free" (no nomination)
-    bookedBy?: 'user' | 'operator' | 'guest';
-    status: 'pending' | 'confirmed' | 'cancelled';
+    bookedBy?: 'user' | 'operator' | 'guest' | 'proxy';
+    status: 'pending' | 'confirmed' | 'cancelled' | 'no_show';
     startTime: Date;
     endTime: Date;
     notes?: string;
@@ -158,7 +159,18 @@ export interface Reservation {
     date: string; // YYYY-MM-DD
     startTime: string; // HH:mm
     endTime: string; // HH:mm
-    status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+    status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'no_show';
     notes?: string;
+    createdAt: string;
+}
+
+export interface AuditLog {
+    id: string;
+    userId?: string;
+    userEmail?: string;
+    action: string;
+    target?: string;
+    details?: any;
+    ipAddress?: string;
     createdAt: string;
 }

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Calendar, User, Check, AlertCircle } from 'lucide-react';
-import type { Reservation, Staff, MenuItem, Shift } from '../../types';
+import { createBooking, updateBooking, logAction } from '../../services/db';
+import type { Reservation, Staff, MenuItem, Shift, Booking } from '../../types';
 
 interface ReservationEditorModalProps {
     isOpen: boolean;
@@ -10,15 +11,17 @@ interface ReservationEditorModalProps {
     staffList: Staff[];
     menuItems: MenuItem[];
     shifts?: Shift[]; // Add shifts prop
+    clinicId?: string;
     onSave: (reservation: Reservation) => void;
 }
 
-const ReservationEditorModal = ({ isOpen, onClose, initialReservation, staffList, menuItems, shifts = [], onSave }: ReservationEditorModalProps) => {
+const ReservationEditorModal = ({ isOpen, onClose, initialReservation, staffList, menuItems, shifts = [], clinicId, onSave }: ReservationEditorModalProps) => {
     const [formData, setFormData] = useState<Partial<Reservation>>({
         status: 'confirmed',
         ...initialReservation
     });
     const [error, setError] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
@@ -91,7 +94,7 @@ const ReservationEditorModal = ({ isOpen, onClose, initialReservation, staffList
 
     if (!isOpen) return null;
 
-    const handleSave = () => {
+    const handleSave = async () => {
         // Basic validation
         if (!formData.patientName || !formData.date || !formData.startTime || !formData.staffId || !formData.menuItemId) {
             alert('必須項目を入力してください');
@@ -103,24 +106,73 @@ const ReservationEditorModal = ({ isOpen, onClose, initialReservation, staffList
             return;
         }
 
-        // Create full reservation object
-        const reservation: Reservation = {
-            id: formData.id || crypto.randomUUID(),
-            clinicId: 'clinic1', // Mock
-            patientName: formData.patientName,
-            patientEmail: formData.patientEmail,
-            patientPhone: formData.patientPhone,
-            staffId: formData.staffId,
-            menuItemId: formData.menuItemId,
-            date: formData.date!,
-            startTime: formData.startTime!,
-            endTime: formData.endTime || calculateEndTime(formData.startTime!, formData.menuItemId),
-            status: formData.status as any,
-            notes: formData.notes,
-            createdAt: formData.createdAt || new Date().toISOString()
-        };
+        setIsSubmitting(true);
 
-        onSave(reservation);
+        try {
+            // Create full reservation object
+            const reservation: Reservation = {
+                id: formData.id || crypto.randomUUID(),
+                clinicId: clinicId || 'clinic1',
+                patientName: formData.patientName,
+                patientEmail: formData.patientEmail,
+                patientPhone: formData.patientPhone,
+                staffId: formData.staffId,
+                menuItemId: formData.menuItemId,
+                date: formData.date!,
+                startTime: formData.startTime!,
+                endTime: formData.endTime || calculateEndTime(formData.startTime!, formData.menuItemId),
+                status: formData.status as any,
+                notes: formData.notes,
+                createdAt: formData.createdAt || new Date().toISOString()
+            };
+
+            // DB Operations
+            // Mapping Reservation back to Booking for DB
+            // We need to construct a Booking object. The type mapping might be tricky.
+            // Let's create a Partial<Booking> that matches what createBooking/updateBooking expects.
+
+            // NOTE: The previous code was purely client-side mock based. 
+            // Now we are integrating DB.
+            // Reservation type is the frontend view, Booking is the DB type?
+            // Let's assume they are similar enough or map manually.
+
+            const bookingData: Partial<Booking> = {
+                clinicId: reservation.clinicId,
+                userId: undefined, // guest booking
+                staffId: reservation.staffId,
+                bookedBy: 'proxy', // Valid value
+                status: reservation.status as any, // Cast to any to avoid strict mismatch if types are slightly different
+                startTime: new Date(`${reservation.date}T${reservation.startTime}`),
+                endTime: new Date(`${reservation.date}T${reservation.endTime}`),
+                notes: reservation.notes,
+                guestName: reservation.patientName,
+                guestContact: reservation.patientPhone,
+                guestEmail: reservation.patientEmail,
+                menuItemId: reservation.menuItemId
+            };
+
+            if (!formData.id) {
+                // Create
+                const newId = await createBooking(bookingData as Booking);
+                reservation.id = newId; // Update ID with real DB ID
+                await logAction('CREATE_RESERVATION', `Clinic: ${reservation.clinicId}`, { guest: reservation.patientName });
+            } else {
+                // Update
+                await updateBooking(reservation.id, bookingData);
+                await logAction('UPDATE_RESERVATION_STATUS', `Booking: ${reservation.id}`, {
+                    status: reservation.status,
+                    previousStatus: initialReservation?.status
+                });
+            }
+
+            onSave(reservation);
+            onClose();
+        } catch (err) {
+            console.error(err);
+            alert('保存に失敗しました');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const calculateEndTime = (start: string, menuId: string) => {
@@ -210,6 +262,31 @@ const ReservationEditorModal = ({ isOpen, onClose, initialReservation, staffList
                             </div>
                         )}
                         <div className="space-y-4">
+                            {/* Status Selector - Only show when editing existing reservation */}
+                            {formData.id && (
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 mb-2">ステータス</label>
+                                    <div className="flex gap-2">
+                                        {[
+                                            { value: 'confirmed', label: '確定', color: 'bg-green-100 text-green-700 border-green-200' },
+                                            { value: 'cancelled', label: 'キャンセル', color: 'bg-red-100 text-red-700 border-red-200' },
+                                            { value: 'no_show', label: '無断キャンセル', color: 'bg-purple-100 text-purple-700 border-purple-200' }
+                                        ].map((statusOption) => (
+                                            <button
+                                                key={statusOption.value}
+                                                onClick={() => setFormData({ ...formData, status: statusOption.value as any })}
+                                                className={`px-4 py-2 rounded-lg text-sm font-bold border-2 transition-all ${formData.status === statusOption.value
+                                                    ? `${statusOption.color} ring-2 ring-offset-1 ring-primary/20`
+                                                    : 'bg-white border-gray-100 text-gray-500 hover:bg-gray-50'
+                                                    }`}
+                                            >
+                                                {statusOption.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
                             <div>
                                 <label className="block text-sm font-bold text-gray-700 mb-2">担当スタッフ <span className="text-red-500">*</span></label>
                                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -295,10 +372,11 @@ const ReservationEditorModal = ({ isOpen, onClose, initialReservation, staffList
                     </button>
                     <button
                         onClick={handleSave}
-                        className="px-8 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-blue-200 hover:bg-primary/90 hover:scale-[1.02] transition-all flex items-center gap-2"
+                        disabled={isSubmitting}
+                        className="px-8 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-blue-200 hover:bg-primary/90 hover:scale-[1.02] transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <Check className="w-5 h-5" />
-                        保存する
+                        {isSubmitting ? '保存中...' : '保存する'}
                     </button>
                 </div>
             </div>

@@ -10,7 +10,13 @@ import FAQ from './pages/FAQ';
 import DiagnosisWizard from './pages/user/DiagnosisWizard';
 import ClinicDashboard from './pages/clinic/Dashboard';
 import ProfileEditor from './pages/clinic/ProfileEditor';
-import CallCenter from './pages/admin/CallCenter';
+import UserManagement from './pages/admin/UserManagement';
+import Dashboard from './pages/admin/Dashboard';
+import ClinicManagement from './pages/admin/ClinicManagement';
+import AdminClinicDetail from './pages/admin/ClinicDetail';
+import BookingOverview from './pages/admin/BookingOverview';
+import AuditLogs from './pages/admin/AuditLogs';
+import AdminLayout from './components/admin/AdminLayout';
 import ClinicSearch from './pages/user/ClinicSearch';
 import ClinicDetail from './pages/user/ClinicDetail';
 import StaffManagement from './pages/clinic/StaffManagement';
@@ -81,7 +87,17 @@ function App() {
 
           {/* Super Admin Routes */}
           <Route element={<ProtectedRoute allowedRoles={['super_admin']} />}>
-            <Route path="/admin/call-center" element={<CallCenter />} />
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="bookings" element={<BookingOverview />} />
+              <Route path="audit-logs" element={<AuditLogs />} />
+              <Route path="users" element={<UserManagement />} />
+              <Route path="clinics" element={<ClinicManagement />} />
+              <Route path="clinics/:id" element={<AdminClinicDetail />} />
+              {/* Fallback or other routes */}
+              <Route path="call-center" element={<UserManagement />} />
+            </Route>
           </Route>
         </Routes>
       </Router>

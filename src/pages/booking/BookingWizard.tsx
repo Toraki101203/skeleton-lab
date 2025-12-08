@@ -452,7 +452,7 @@ const BookingWizard = () => {
                 clinicId: clinic.id,
                 userId: user?.uid,
                 staffId: bookingData.staffId,
-                status: 'pending',
+                status: 'confirmed',
                 startTime: startDateTime,
                 endTime: endDateTime,
                 notes: bookingData.notes,

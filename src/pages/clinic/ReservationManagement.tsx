@@ -23,6 +23,7 @@ const ReservationManagement = () => {
     const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
     const [staffList, setStaffList] = useState<Staff[]>([]);
     const [shifts, setShifts] = useState<Shift[]>([]);
+    const [clinicId, setClinicId] = useState<string | undefined>(undefined);
 
 
     // Fetch Database Data
@@ -39,7 +40,7 @@ const ReservationManagement = () => {
 
                 if (clinicError) throw clinicError;
                 if (clinicData) {
-
+                    setClinicId(clinicData.id);
                     if (clinicData.menu_items) setMenuItems(clinicData.menu_items);
 
                     // Add "Free" staff for unassigned bookings
@@ -303,6 +304,7 @@ const ReservationManagement = () => {
                     staffList={staffList}
                     menuItems={menuItems}
                     shifts={shifts}
+                    clinicId={clinicId}
                     onSave={handleSaveReservation}
                 />
             </div>
