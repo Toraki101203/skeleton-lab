@@ -64,8 +64,9 @@ function App() {
           <Route element={<ProtectedRoute allowedRoles={['user', 'super_admin']} />}>
             <Route path="/diagnosis" element={<DiagnosisWizard />} />
             <Route path="/diagnosis/result" element={<DiagnosisResult />} />
-            <Route path="/search" element={<ClinicSearch />} />
           </Route>
+
+          <Route path="/search" element={<ClinicSearch />} />
 
           {/* Clinic Admin Routes */}
           <Route element={<ProtectedRoute allowedRoles={['clinic_admin', 'super_admin']} />}>
