@@ -21,6 +21,7 @@ const ClinicSearch = () => {
     const [selectedPrefecture, setSelectedPrefecture] = useState('');
     const [selectedCity, setSelectedCity] = useState('');
     const [cities, setCities] = useState<string[]>([]);
+    const [addressData, setAddressData] = useState<Record<string, string[]> | null>(null); // Cache for address data
     const [filterOpenNow, setFilterOpenNow] = useState(false);
     const [searchRadius, setSearchRadius] = useState(15); // Default 15km
     const [clinics, setClinics] = useState<Clinic[]>([]);
@@ -40,29 +41,32 @@ const ClinicSearch = () => {
                 setLoading(false);
             }
         };
-        fetchClinics();
-    }, []);
 
-    // Fetch cities when prefecture changes
-    useEffect(() => {
-        const fetchCities = async () => {
-            if (!selectedPrefecture) {
-                setCities([]);
-                setSelectedCity('');
-                return;
-            }
+        const fetchAddresses = async () => {
             try {
-                const response = await fetch(`https://geolonia.github.io/japanese-addresses/api/ja/${selectedPrefecture}.json`);
+                const response = await fetch('https://geolonia.github.io/japanese-addresses/api/ja.json');
                 const data = await response.json();
-                setCities(data);
-                setSelectedCity(''); // Reset city when prefecture changes
+                setAddressData(data);
             } catch (error) {
-                console.error("Failed to fetch cities", error);
-                setCities([]);
+                console.error("Failed to fetch address data", error);
             }
         };
-        fetchCities();
-    }, [selectedPrefecture]);
+
+        fetchClinics();
+        fetchAddresses();
+    }, []);
+
+    // Update cities when prefecture changes or address data is loaded
+    useEffect(() => {
+        if (!selectedPrefecture || !addressData) {
+            setCities([]);
+            setSelectedCity('');
+            return;
+        }
+        const prefectureCities = addressData[selectedPrefecture] || [];
+        setCities(prefectureCities);
+        setSelectedCity('');
+    }, [selectedPrefecture, addressData]);
 
     const handleCurrentLocation = () => {
         if (!navigator.geolocation) {
