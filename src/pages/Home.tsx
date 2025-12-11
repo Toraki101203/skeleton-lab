@@ -4,9 +4,6 @@ import PageLayout from '../components/PageLayout';
 import { Skull, Activity, Clock } from 'lucide-react';
 
 const Home = () => {
-    const [bodyPart, setBodyPart] = useState('');
-    const [symptom, setSymptom] = useState('');
-    const [duration, setDuration] = useState('');
 
     return (
         <PageLayout>
@@ -37,15 +34,14 @@ const Home = () => {
                                 <span className="w-5 h-5 border-2 border-blue-400 mr-2 rounded-sm"></span>
                                 気になる部位は？ <span className="text-xs font-normal text-gray-500 ml-2">※複数選択可</span>
                             </div>
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    value={bodyPart}
-                                    onChange={(e) => setBodyPart(e.target.value)}
-                                    className="flex-1 h-12 border-2 border-gray-300 rounded-lg px-4 bg-gray-50 focus:bg-white focus:border-accent outline-none transition-colors"
-                                />
-                                <button className="px-4 py-2 bg-primary/80 text-white rounded-lg text-sm font-bold hover:bg-primary transition-colors">完了</button>
-                            </div>
+                            <Link to="/diagnosis" className="flex gap-2 group">
+                                <div className="flex-1 h-12 border-2 border-gray-300 rounded-lg px-4 bg-gray-50 group-hover:bg-white group-hover:border-accent flex items-center text-gray-400 transition-colors">
+                                    例: 首、腰
+                                </div>
+                                <div className="px-4 py-2 bg-primary/80 text-white rounded-lg text-sm font-bold group-hover:bg-primary transition-colors flex items-center">
+                                    選択
+                                </div>
+                            </Link>
                         </div>
 
                         {/* Question 2 */}
@@ -54,15 +50,14 @@ const Home = () => {
                                 <span className="w-5 h-5 border-2 border-blue-400 mr-2 rounded-sm"></span>
                                 症状は？ <span className="text-xs font-normal text-gray-500 ml-2">※複数選択可</span>
                             </div>
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    value={symptom}
-                                    onChange={(e) => setSymptom(e.target.value)}
-                                    className="flex-1 h-12 border-2 border-gray-300 rounded-lg px-4 bg-gray-50 focus:bg-white focus:border-accent outline-none transition-colors"
-                                />
-                                <button className="px-4 py-2 bg-primary/80 text-white rounded-lg text-sm font-bold hover:bg-primary transition-colors">完了</button>
-                            </div>
+                            <Link to="/diagnosis" className="flex gap-2 group">
+                                <div className="flex-1 h-12 border-2 border-gray-300 rounded-lg px-4 bg-gray-50 group-hover:bg-white group-hover:border-accent flex items-center text-gray-400 transition-colors">
+                                    例: 痛み、しびれ
+                                </div>
+                                <div className="px-4 py-2 bg-primary/80 text-white rounded-lg text-sm font-bold group-hover:bg-primary transition-colors flex items-center">
+                                    選択
+                                </div>
+                            </Link>
                         </div>
 
                         {/* Question 3 */}
@@ -71,15 +66,14 @@ const Home = () => {
                                 <span className="w-5 h-5 border-2 border-blue-400 mr-2 rounded-sm"></span>
                                 症状の期間は？
                             </div>
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    value={duration}
-                                    onChange={(e) => setDuration(e.target.value)}
-                                    className="flex-1 h-12 border-2 border-gray-300 rounded-lg px-4 bg-gray-50 focus:bg-white focus:border-accent outline-none transition-colors"
-                                />
-                                <button className="px-4 py-2 bg-primary/80 text-white rounded-lg text-sm font-bold hover:bg-primary transition-colors">完了</button>
-                            </div>
+                            <Link to="/diagnosis" className="flex gap-2 group">
+                                <div className="flex-1 h-12 border-2 border-gray-300 rounded-lg px-4 bg-gray-50 group-hover:bg-white group-hover:border-accent flex items-center text-gray-400 transition-colors">
+                                    例: 1週間前から
+                                </div>
+                                <div className="px-4 py-2 bg-primary/80 text-white rounded-lg text-sm font-bold group-hover:bg-primary transition-colors flex items-center">
+                                    選択
+                                </div>
+                            </Link>
                         </div>
                     </div>
 

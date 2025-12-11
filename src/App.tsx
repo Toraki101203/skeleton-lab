@@ -66,10 +66,13 @@ function App() {
           <Route path="/clinic/:id" element={<ClinicDetail />} />
           <Route path="/booking" element={<BookingWizard />} />
 
-          {/* User Routes */}
+          {/* Public Diagnosis Routes */}
+          <Route path="/diagnosis" element={<DiagnosisWizard />} />
+          <Route path="/diagnosis/result" element={<DiagnosisResult />} />
+
+          {/* User Protected Routes */}
           <Route element={<ProtectedRoute allowedRoles={['user', 'super_admin']} />}>
-            <Route path="/diagnosis" element={<DiagnosisWizard />} />
-            <Route path="/diagnosis/result" element={<DiagnosisResult />} />
+            {/* Add user specific protected routes here if any */}
           </Route>
 
           <Route path="/search" element={<ClinicSearch />} />

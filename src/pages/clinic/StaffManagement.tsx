@@ -155,14 +155,14 @@ const StaffManagement = () => {
     return (
         <PageLayout>
             <div className="max-w-7xl mx-auto px-6 py-12">
-                <div className="flex justify-between items-center mb-8">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-800">スタッフ管理</h1>
                         <p className="text-gray-500 mt-1">スタッフの登録、シフト設定、対応メニューの管理を行います</p>
                     </div>
                     <button
                         onClick={openNewStaffModal}
-                        className="flex items-center px-4 py-2 bg-primary text-white rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-primary/90 transition-all"
+                        className="flex items-center px-4 py-2 bg-primary text-white rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-primary/90 transition-all w-full sm:w-auto justify-center"
                     >
                         <Plus className="w-5 h-5 mr-2" />
                         スタッフ追加

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, ChevronLeft } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Activity } from 'lucide-react';
 import { saveDiagnosis } from '../../services/db';
 import { useAuth } from '../../context/AuthContext';
 
@@ -12,31 +12,7 @@ interface DiagnosisData {
     duration: string;
 }
 
-const BODY_PARTS = [
-    { id: 'Head', label: '頭・顔' },
-    { id: 'Neck', label: '首' },
-    { id: 'Shoulders', label: '肩' },
-    { id: 'Back', label: '背中・腰' },
-    { id: 'Arms', label: '腕・手' },
-    { id: 'Legs', label: '脚・足' },
-    { id: 'Hips', label: '股関節・お尻' }
-];
-
-const SYMPTOMS = [
-    { id: 'Pain', label: '痛み' },
-    { id: 'Stiffness', label: 'こり・張り' },
-    { id: 'Numbness', label: 'しびれ' },
-    { id: 'Weakness', label: '力が入りにくい' },
-    { id: 'Swelling', label: '腫れ' }
-];
-
-const DURATIONS = [
-    { id: 'Today', label: '今日から' },
-    { id: 'A few days', label: '数日前から' },
-    { id: '1-2 weeks', label: '1〜2週間前から' },
-    { id: '1 month+', label: '1ヶ月以上前から' },
-    { id: 'Chronic (Years)', label: '長期間（慢性）' }
-];
+import { BODY_PARTS, SYMPTOMS, DURATIONS } from '../../constants/diagnosis';
 
 const DiagnosisWizard = () => {
     const navigate = useNavigate();
@@ -73,10 +49,6 @@ const DiagnosisWizard = () => {
     const handleSubmit = async () => {
         if (user) {
             try {
-                // Save English IDs for consistency, or Japanese labels if preferred.
-                // Here we save the ID to keep backend data consistent/analyzable, 
-                // but for display we might want to map it back.
-                // For now, let's save the ID as it was before.
                 await saveDiagnosis(user.uid, data);
             } catch (e) {
                 console.error("Failed to save diagnosis", e);
@@ -99,85 +71,115 @@ const DiagnosisWizard = () => {
         }));
     };
 
+    const getProgress = () => ((step / 3) * 100);
+
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col items-center pt-10 px-4">
-            <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl overflow-hidden">
-                {/* Progress Bar */}
-                <div className="bg-gray-200 h-2 w-full">
-                    <div
-                        className="bg-accent h-full transition-all duration-300 ease-out"
-                        style={{ width: `${(step / 3) * 100}%` }}
-                    />
+        <div className="min-h-screen bg-gray-50 pb-20 font-sans">
+            {/* Unified Gradient Header */}
+            <div className="bg-gradient-to-b from-primary to-blue-600 text-white pt-10 pb-20 px-6 rounded-b-[3rem] shadow-xl relative overflow-hidden transition-all duration-500">
+                <div className="max-w-3xl mx-auto text-center relative z-10">
+                    <div className="inline-flex items-center justify-center p-3 bg-white/20 backdrop-blur-md rounded-full mb-4">
+                        <Activity className="w-8 h-8 text-white" />
+                    </div>
+                    <h1 className="text-2xl md:text-3xl font-bold mb-2">モニター診断 問診</h1>
+                    <p className="text-blue-100 text-sm md:text-base">
+                        最適な解決策をご提案するため、<br className="sm:hidden" />3つの質問にお答えください
+                    </p>
                 </div>
 
-                <div className="p-8">
-                    <h2 className="text-2xl font-bold text-primary mb-6 text-center">
-                        {step === 1 && "どこが気になりますか？"}
-                        {step === 2 && "どのような症状ですか？"}
-                        {step === 3 && "いつから続いていますか？"}
-                    </h2>
+                {/* Decorative circles matching DiagnosisResult */}
+                <div className="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2 blur-2xl"></div>
+                <div className="absolute bottom-0 right-0 w-80 h-80 bg-white/10 rounded-full translate-x-1/3 translate-y-1/3 blur-3xl"></div>
+            </div>
 
-                    <div className="min-h-[300px]">
-                        {/* Step 1: Body Part */}
-                        {step === 1 && (
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                {BODY_PARTS.map(part => (
-                                    <button
-                                        key={part.id}
-                                        onClick={() => setData({ ...data, bodyPart: part.id })}
-                                        className={`p-6 rounded-xl border-2 transition-all ${data.bodyPart === part.id
-                                            ? 'border-accent bg-green-50 text-accent font-bold'
-                                            : 'border-gray-200 hover:border-blue-200'
-                                            }`}
-                                    >
-                                        {part.label}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
+            {/* Overlapping Card Container */}
+            <div className="max-w-xl mx-auto px-4 -mt-10 relative z-20">
+                <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 flex flex-col min-h-[500px]">
 
-                        {/* Step 2: Symptoms */}
-                        {step === 2 && (
-                            <div className="grid grid-cols-2 gap-4">
-                                {SYMPTOMS.map(sym => (
-                                    <button
-                                        key={sym.id}
-                                        onClick={() => toggleSymptom(sym.id)}
-                                        className={`p-6 rounded-xl border-2 transition-all ${data.symptoms.includes(sym.id)
-                                            ? 'border-accent bg-green-50 text-accent font-bold'
-                                            : 'border-gray-200 hover:border-blue-200'
-                                            }`}
-                                    >
-                                        {sym.label}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-
-                        {/* Step 3: Duration */}
-                        {step === 3 && (
-                            <div className="space-y-3">
-                                {DURATIONS.map(dur => (
-                                    <button
-                                        key={dur.id}
-                                        onClick={() => setData({ ...data, duration: dur.id })}
-                                        className={`w-full p-4 rounded-xl border-2 text-left transition-all ${data.duration === dur.id
-                                            ? 'border-accent bg-green-50 text-accent font-bold'
-                                            : 'border-gray-200 hover:border-blue-200'
-                                            }`}
-                                    >
-                                        {dur.label}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
+                    {/* Progress Bar */}
+                    <div className="bg-gray-100 h-2 w-full">
+                        <div
+                            className="bg-accent h-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(34,197,94,0.5)]"
+                            style={{ width: `${getProgress()}%` }}
+                        />
                     </div>
 
-                    <div className="flex justify-between mt-8 pt-6 border-t border-gray-100">
+                    <div className="p-6 md:p-8 flex-1 overflow-y-auto">
+                        <div className="mb-8 text-center">
+                            <span className="text-xs font-bold text-blue-500 uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">Step {step} / 3</span>
+                            <h2 className="text-xl md:text-2xl font-bold text-gray-800 mt-4 leading-relaxed">
+                                {step === 1 && "どこが気になりますか？"}
+                                {step === 2 && "どのような症状ですか？"}
+                                {step === 3 && "いつから続いていますか？"}
+                            </h2>
+                        </div>
+
+                        <div className="min-h-[300px] animate-fade-in">
+                            {/* Step 1: Body Part */}
+                            {step === 1 && (
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+                                    {BODY_PARTS.map(part => (
+                                        <button
+                                            key={part.id}
+                                            onClick={() => setData({ ...data, bodyPart: part.id })}
+                                            className={`p-4 md:p-5 rounded-2xl border-2 transition-all active:scale-95 min-h-[80px] flex items-center justify-center text-center font-bold text-base md:text-lg ${data.bodyPart === part.id
+                                                ? 'border-accent bg-accent/5 text-accent shadow-inner ring-2 ring-accent/20'
+                                                : 'border-gray-100 hover:border-blue-200 bg-white hover:bg-gray-50 shadow-sm'
+                                                }`}
+                                        >
+                                            {part.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Step 2: Symptoms */}
+                            {step === 2 && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                                    {SYMPTOMS.map(sym => (
+                                        <button
+                                            key={sym.id}
+                                            onClick={() => toggleSymptom(sym.id)}
+                                            className={`p-4 md:p-5 rounded-2xl border-2 transition-all active:scale-95 min-h-[70px] flex items-center justify-center text-center font-bold text-base md:text-lg ${data.symptoms.includes(sym.id)
+                                                ? 'border-accent bg-accent/5 text-accent shadow-inner ring-2 ring-accent/20'
+                                                : 'border-gray-100 hover:border-blue-200 bg-white hover:bg-gray-50 shadow-sm'
+                                                }`}
+                                        >
+                                            {sym.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Step 3: Duration */}
+                            {step === 3 && (
+                                <div className="space-y-3">
+                                    {DURATIONS.map(dur => (
+                                        <button
+                                            key={dur.id}
+                                            onClick={() => setData({ ...data, duration: dur.id })}
+                                            className={`w-full p-5 rounded-2xl border-2 text-left transition-all active:scale-98 min-h-[64px] flex items-center justify-between font-bold text-base md:text-lg ${data.duration === dur.id
+                                                ? 'border-accent bg-accent/5 text-accent shadow-inner ring-2 ring-accent/20'
+                                                : 'border-gray-100 hover:border-blue-200 bg-white hover:bg-gray-50 shadow-sm'
+                                                }`}
+                                        >
+                                            <span>{dur.label}</span>
+                                            {data.duration === dur.id && <div className="w-4 h-4 bg-accent rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)]" />}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Footer / Controls */}
+                    <div className="p-6 border-t border-gray-100 bg-white sticky bottom-0 z-10 flex justify-between items-center gap-4">
                         <button
                             onClick={handleBack}
                             disabled={step === 1}
-                            className={`flex items-center px-6 py-2 rounded-lg ${step === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100'
+                            className={`flex items-center px-4 py-3 rounded-xl font-bold transition-colors ${step === 1
+                                ? 'text-gray-300 cursor-not-allowed opacity-0'
+                                : 'text-gray-500 hover:bg-gray-100 active:bg-gray-200'
                                 }`}
                         >
                             <ChevronLeft className="w-5 h-5 mr-1" /> 戻る
@@ -190,12 +192,26 @@ const DiagnosisWizard = () => {
                                 (step === 2 && data.symptoms.length === 0) ||
                                 (step === 3 && !data.duration)
                             }
-                            className="flex items-center px-8 py-3 bg-accent text-white rounded-lg shadow-lg hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                            className={`flex-1 max-w-[240px] flex items-center justify-center px-6 py-4 rounded-xl shadow-lg transition-all active:scale-95 font-bold text-lg
+                                ${(step === 1 && !data.bodyPart) || (step === 2 && data.symptoms.length === 0) || (step === 3 && !data.duration)
+                                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                    : 'bg-gradient-to-r from-accent to-green-500 text-white hover:shadow-green-200 hover:shadow-xl'
+                                }`}
                         >
-                            {step === 3 ? '診断結果を見る' : '次へ'}
+                            {step === 3 ? '診断結果を見る' : '次へ進む'}
                             {step !== 3 && <ChevronRight className="w-5 h-5 ml-1" />}
                         </button>
                     </div>
+                </div>
+
+                {/* Cancel Link */}
+                <div className="text-center mt-6">
+                    <button
+                        onClick={() => navigate('/')}
+                        className="text-gray-400 text-sm hover:text-gray-600 underline"
+                    >
+                        トップに戻る
+                    </button>
                 </div>
             </div>
         </div>

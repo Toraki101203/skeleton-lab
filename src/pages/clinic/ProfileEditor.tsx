@@ -256,12 +256,12 @@ const ProfileEditor = () => {
     return (
         <PageLayout>
             <div className="max-w-7xl mx-auto px-6 py-12">
-                <div className="flex justify-between items-center mb-8">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-800">ページ作成・編集</h1>
                         <p className="text-gray-500 mt-1">医院ページの作成、デザイン選択、メニュー・スタッフ登録を行います</p>
                     </div>
-                    <div className="flex gap-3">
+                    <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                         <button
                             onClick={() => {
                                 if (clinicId) {
@@ -270,7 +270,7 @@ const ProfileEditor = () => {
                                     alert('まずは「変更を保存」ボタンを押して、基本情報を保存してください。');
                                 }
                             }}
-                            className={`flex items-center px-6 py-3 border-2 rounded-xl font-bold transition-all ${clinicId
+                            className={`flex justify-center items-center px-6 py-3 border-2 rounded-xl font-bold transition-all w-full sm:w-auto whitespace-nowrap ${clinicId
                                 ? 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300'
                                 : 'bg-gray-100 text-gray-400 border-gray-100 cursor-not-allowed'
                                 }`}
@@ -281,7 +281,7 @@ const ProfileEditor = () => {
                         <button
                             onClick={handleSave}
                             disabled={loading}
-                            className="flex items-center px-6 py-3 bg-primary text-white rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-primary/90 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex justify-center items-center px-6 py-3 bg-primary text-white rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-primary/90 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto whitespace-nowrap"
                         >
                             <Save className="w-5 h-5 mr-2" />
                             {loading ? '保存中...' : '変更を保存'}

@@ -50,7 +50,7 @@ const Register = () => {
                             type="text"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-primary"
+                            className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:border-primary text-base"
                             required
                         />
                     </div>
@@ -60,7 +60,7 @@ const Register = () => {
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-primary"
+                            className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:border-primary text-base"
                             required
                         />
                     </div>
@@ -70,7 +70,7 @@ const Register = () => {
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-primary"
+                            className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:border-primary text-base"
                             required
                             minLength={6}
                         />
@@ -80,7 +80,7 @@ const Register = () => {
                         <select
                             value={role}
                             onChange={(e) => setRole(e.target.value as UserRole)}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-primary"
+                            className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:border-primary text-base bg-white"
                         >
                             <option value="user">一般ユーザー</option>
                             <option value="clinic_admin">加盟院管理者</option>

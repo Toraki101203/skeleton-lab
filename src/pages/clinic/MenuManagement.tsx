@@ -253,16 +253,16 @@ const MenuManagement = () => {
                     <div className="flex-1">
                         {selectedCategory ? (
                             <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 min-h-[500px]">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h2 className="text-xl font-bold text-gray-800 flex items-center">
-                                        <span className="bg-blue-100 text-primary px-3 py-1 rounded-lg text-sm mr-3">
+                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                                    <h2 className="text-xl font-bold text-gray-800 flex items-center flex-wrap gap-2">
+                                        <span className="bg-blue-100 text-primary px-3 py-1 rounded-lg text-sm">
                                             {selectedCategory}
                                         </span>
                                         メニュー一覧
                                     </h2>
                                     <button
                                         onClick={openNewItemModal}
-                                        className="flex items-center px-4 py-2 bg-primary text-white rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-primary/90 transition-all"
+                                        className="flex items-center px-4 py-2 bg-primary text-white rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-primary/90 transition-all w-full sm:w-auto justify-center"
                                     >
                                         <Plus className="w-5 h-5 mr-2" />
                                         メニュー追加

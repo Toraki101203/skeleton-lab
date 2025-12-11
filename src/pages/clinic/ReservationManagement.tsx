@@ -138,7 +138,7 @@ const ReservationManagement = () => {
 
     return (
         <PageLayout>
-            <div className="max-w-7xl mx-auto px-4 py-8 h-[calc(100vh-100px)] flex flex-col">
+            <div className="max-w-7xl mx-auto px-4 py-8 h-auto lg:h-[calc(100vh-100px)] flex flex-col">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-6 shrink-0">
                     <div>
@@ -150,7 +150,7 @@ const ReservationManagement = () => {
                     </div>
                 </div>
 
-                <div className="flex flex-1 gap-6 overflow-hidden">
+                <div className="flex flex-col lg:flex-row flex-1 gap-6 overflow-visible lg:overflow-hidden">
                     {/* Main Calendar Area */}
                     <div className="flex-1 bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden flex flex-col">
                         {/* Calendar Header */}

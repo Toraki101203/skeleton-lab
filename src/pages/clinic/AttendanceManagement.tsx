@@ -44,7 +44,7 @@ const AttendanceManagement = () => {
     return (
         <PageLayout>
             <div className="max-w-5xl mx-auto px-6 py-12 animate-fade-in">
-                <div className="flex justify-between items-center mb-8">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
                             <Clock className="w-8 h-8 text-primary" />
@@ -52,8 +52,8 @@ const AttendanceManagement = () => {
                         </h1>
                         <p className="text-gray-600 mt-2 font-medium">スタッフの出勤・退勤状況を確認します</p>
                     </div>
-                    <div className="flex gap-4">
-                        <button className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-white/50 rounded-xl text-sm font-bold text-gray-600 hover:bg-white transition-colors flex items-center gap-2 shadow-sm">
+                    <div className="flex gap-4 w-full sm:w-auto">
+                        <button className="w-full sm:w-auto px-4 py-2 bg-white/80 backdrop-blur-sm border border-white/50 rounded-xl text-sm font-bold text-gray-600 hover:bg-white transition-colors flex items-center justify-center gap-2 shadow-sm">
                             <Calendar className="w-4 h-4" />
                             {currentDate.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long' })}
                         </button>
