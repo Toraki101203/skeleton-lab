@@ -13,7 +13,12 @@ const PREFECTURES = [
     "熊本県", "大分県", "宮崎県", "鹿児島県", "沖縄県"
 ];
 
+import { useLocation } from 'react-router-dom';
+
 const ClinicSearch = () => {
+    const location = useLocation();
+    const initialState = location.state?.userLocation ? { location: location.state.userLocation } : undefined;
+
     const {
         searchTerm, setSearchTerm,
         selectedPrefecture, setSelectedPrefecture,
@@ -26,7 +31,7 @@ const ClinicSearch = () => {
         filteredClinics,
         loading,
         calculateDistance
-    } = useClinicSearch();
+    } = useClinicSearch(initialState);
 
     return (
         <PageLayout>

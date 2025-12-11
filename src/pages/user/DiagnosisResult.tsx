@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { CheckCircle, Search, Phone, ArrowRight, MapPin } from 'lucide-react';
 import type { Clinic } from '../../types';
-import { BODY_PARTS, DURATIONS, SYMPTOMS } from '../../constants/diagnosis';
+import { BODY_PARTS, DURATIONS } from '../../constants/diagnosis';
 
 // Mock Recommendations (would be fetched based on criteria in a real app)
 const MOCK_RECOMMENDATIONS: Clinic[] = [
@@ -52,21 +52,50 @@ const DiagnosisResult = () => {
         );
     }
 
+    const [isLocating, setIsLocating] = useState(false);
+
     const handleSearchClick = () => {
-        // Pass diagnosis data to search page as initial filters
-        navigate('/search', {
-            state: {
-                prefill: {
-                    bodyPart: diagnosisData.bodyPart
+        setIsLocating(true);
+
+        if (!navigator.geolocation) {
+            navigate('/search', {
+                state: {
+                    prefill: { bodyPart: diagnosisData.bodyPart }
                 }
-            }
-        });
+            });
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                setIsLocating(false);
+                navigate('/search', {
+                    state: {
+                        prefill: { bodyPart: diagnosisData.bodyPart },
+                        userLocation: {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        }
+                    }
+                });
+            },
+            (error) => {
+                console.warn("Location access denied", error);
+                setIsLocating(false);
+                // Fallback: navigate without location
+                navigate('/search', {
+                    state: {
+                        prefill: { bodyPart: diagnosisData.bodyPart }
+                    }
+                });
+            },
+            { timeout: 5000 }
+        );
     };
 
     // Helper to get labels
     const getBodyPartLabel = (id: string) => BODY_PARTS.find(p => p.id === id)?.label || id;
     const getDurationLabel = (id: string) => DURATIONS.find(d => d.id === id)?.label || id;
-    const getSymptomLabel = (id: string) => SYMPTOMS.find(s => s.id === id)?.label || id;
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
@@ -109,11 +138,12 @@ const DiagnosisResult = () => {
                             </p>
                             <button
                                 onClick={handleSearchClick}
-                                className="w-full py-4 bg-primary text-white rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-600 transition-all flex items-center justify-center gap-2 group"
+                                disabled={isLocating}
+                                className={`w-full py-4 bg-primary text-white rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-600 transition-all flex items-center justify-center gap-2 group ${isLocating ? 'opacity-75 cursor-wait' : ''}`}
                             >
                                 <Search className="w-5 h-5" />
-                                おすすめの院を見る
-                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                {isLocating ? '現在地を取得中...' : 'おすすめの院を見る'}
+                                {!isLocating && <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
                             </button>
                         </div>
                     </div>

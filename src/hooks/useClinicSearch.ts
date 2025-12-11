@@ -3,7 +3,7 @@ import type { Clinic } from '../types';
 import { isWithinInterval, parse, getDay } from 'date-fns';
 import { getAllClinics } from '../services/db';
 
-export const useClinicSearch = () => {
+export const useClinicSearch = (initialState?: { location?: { lat: number; lng: number } }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedPrefecture, setSelectedPrefecture] = useState('');
     const [selectedCity, setSelectedCity] = useState('');
@@ -14,7 +14,7 @@ export const useClinicSearch = () => {
     const [clinics, setClinics] = useState<Clinic[]>([]);
     const [filteredClinics, setFilteredClinics] = useState<Clinic[]>([]);
     const [loading, setLoading] = useState(true);
-    const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+    const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(initialState?.location || null);
 
     useEffect(() => {
         const fetchClinics = async () => {
