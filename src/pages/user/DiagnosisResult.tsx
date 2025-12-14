@@ -32,8 +32,10 @@ const DiagnosisResult = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const [diagnosisData, setDiagnosisData] = useState<any>(null);
+    const [isLocating, setIsLocating] = useState(false);
 
     useEffect(() => {
+        console.log('DiagnosisResult: location.state', location.state);
         if (location.state) {
             setDiagnosisData(location.state);
         }
@@ -51,8 +53,6 @@ const DiagnosisResult = () => {
             </div>
         );
     }
-
-    const [isLocating, setIsLocating] = useState(false);
 
     const handleSearchClick = () => {
         setIsLocating(true);
@@ -94,8 +94,14 @@ const DiagnosisResult = () => {
     };
 
     // Helper to get labels
-    const getBodyPartLabel = (id: string) => BODY_PARTS.find(p => p.id === id)?.label || id;
-    const getDurationLabel = (id: string) => DURATIONS.find(d => d.id === id)?.label || id;
+    const getBodyPartLabel = (id: string) => {
+        if (!id) return '不明な部位';
+        return BODY_PARTS.find(p => p.id === id)?.label || id;
+    };
+    const getDurationLabel = (id: string) => {
+        if (!id) return '不明な期間';
+        return DURATIONS.find(d => d.id === id)?.label || id;
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
@@ -107,8 +113,8 @@ const DiagnosisResult = () => {
                     </div>
                     <h1 className="text-3xl md:text-4xl font-bold mb-4">問診が完了しました</h1>
                     <p className="text-lg text-blue-100 leading-relaxed max-w-xl mx-auto">
-                        <span className="font-bold border-b border-white/40">{getBodyPartLabel(diagnosisData.bodyPart)}</span> の
-                        <span className="font-bold border-b border-white/40 mx-2">{getDurationLabel(diagnosisData.duration)}</span> 続く症状ですね。<br />
+                        <span className="font-bold border-b border-white/40">{getBodyPartLabel(diagnosisData?.bodyPart)}</span> の
+                        <span className="font-bold border-b border-white/40 mx-2">{getDurationLabel(diagnosisData?.duration)}</span> 続く症状ですね。<br />
                         あなたの状況に合わせて、2つの解決方法をご提案します。
                     </p>
                 </div>
@@ -133,7 +139,7 @@ const DiagnosisResult = () => {
                                 <Search className="w-10 h-10" />
                             </div>
                             <p className="text-gray-600 mb-8 leading-relaxed text-sm">
-                                あなたの症状（{getBodyPartLabel(diagnosisData.bodyPart)}）を得意とする<br />
+                                あなたの症状（{getBodyPartLabel(diagnosisData?.bodyPart)}）を得意とする<br />
                                 近くのクリニックを表示します。
                             </p>
                             <button
@@ -194,7 +200,7 @@ const DiagnosisResult = () => {
                         あなたの症状に合いそうなクリニック
                     </h3>
                     <p className="text-sm text-gray-500">
-                        {diagnosisData.bodyPart}治療の評判が良い医院の一部です
+                        {getBodyPartLabel(diagnosisData?.bodyPart)}治療の評判が良い医院の一部です
                     </p>
                 </div>
 
