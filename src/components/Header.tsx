@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Skull, Menu, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 const Header = () => {
     const { user, logout } = useAuth();
@@ -12,16 +12,10 @@ const Header = () => {
     return (
         <>
             <header className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 text-white">
-                <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity relative z-50">
-                    <Skull className="w-8 h-8" />
-                    <div className="leading-tight">
-                        <div className="text-[10px] opacity-80">Body Balance & Skeleton</div>
-                        <div className="text-xl font-bold tracking-wider">Skeleton Lab.</div>
-                    </div>
-                </Link>
+                <div></div>
 
                 {/* Desktop Navigation */}
-                <nav className="hidden md:flex items-center space-x-6 text-sm opacity-80">
+                <nav className="hidden md:flex items-center space-x-6 text-[19px] font-bold opacity-80 absolute left-1/2 transform -translate-x-1/2">
                     <Link to="/concept" className="hover:opacity-100">コンセプト</Link>
                     <Link to="/features" className="hover:opacity-100">特徴</Link>
                     <Link to="/search" className="hover:opacity-100">掲載院一覧</Link>

@@ -16,6 +16,7 @@ import ClinicManagement from './pages/admin/ClinicManagement';
 import AdminClinicDetail from './pages/admin/ClinicDetail';
 import BookingOverview from './pages/admin/BookingOverview';
 import AuditLogs from './pages/admin/AuditLogs';
+import SiteSettings from './pages/admin/SiteSettings';
 import AdminLayout from './components/admin/AdminLayout';
 import ClinicSearch from './pages/user/ClinicSearch';
 import ClinicDetail from './pages/user/ClinicDetail';
@@ -100,6 +101,7 @@ function App() {
               <Route path="clinics/:id" element={<AdminClinicDetail />} />
               {/* Fallback or other routes */}
               <Route path="call-center" element={<UserManagement />} />
+              <Route path="settings" element={<SiteSettings />} />
             </Route>
           </Route>
         </Routes>

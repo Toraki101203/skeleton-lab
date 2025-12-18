@@ -1,7 +1,8 @@
-import type { ReactNode } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import Header from './Header';
 import Footer from './Footer';
-import { Skull, Activity } from 'lucide-react';
+
+import { getSiteSettings } from '../services/db';
 
 interface PageLayoutProps {
     children: ReactNode;
@@ -9,17 +10,49 @@ interface PageLayoutProps {
 }
 
 const PageLayout = ({ children, className = "" }: PageLayoutProps) => {
+    const [bgSettings, setBgSettings] = useState<{
+        imageUrl: string;
+        height: string;
+        positionTop: string;
+        positionLeft?: string;
+        positionRight?: string;
+        opacity: number;
+    } | null>(null);
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            const data = await getSiteSettings('background_decor_settings');
+            if (data) {
+                setBgSettings(data);
+            }
+        };
+        fetchSettings();
+    }, []);
+
     return (
         <div className="min-h-screen bg-primary text-white font-sans relative overflow-hidden flex flex-col">
             <Header />
 
             {/* Background Decorations */}
-            <div className="absolute top-20 right-[-50px] opacity-10 pointer-events-none">
-                <Skull className="w-96 h-96 rotate-12" />
-            </div>
-            <div className="absolute bottom-[-50px] left-[-50px] opacity-5 pointer-events-none">
-                <Activity className="w-80 h-80 -rotate-12" />
-            </div>
+            {bgSettings && bgSettings.imageUrl && (
+                <div
+                    className="absolute pointer-events-none transition-all duration-300 ease-in-out z-0"
+                    style={{
+                        top: bgSettings.positionTop,
+                        left: bgSettings.positionLeft,
+                        right: bgSettings.positionRight,
+                        height: bgSettings.height,
+                        opacity: (bgSettings.opacity ?? 10) / 100
+                    }}
+                >
+                    <img
+                        src={bgSettings.imageUrl}
+                        alt=""
+                        style={{ height: '100%', width: 'auto' }}
+                        className="object-contain" // rotate-12 was on the skull, maybe user wants it? usually skull images are upright.
+                    />
+                </div>
+            )}
 
             <main className={`container mx-auto px-4 pt-32 pb-32 relative z-10 flex-grow ${className}`}>
                 {children}

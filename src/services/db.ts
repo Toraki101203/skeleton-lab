@@ -394,3 +394,45 @@ export const logAction = async (action: string, target?: string, details?: any) 
 
     if (error) console.error('Failed to log action:', error);
 };
+
+// --- Site Settings ---
+
+export interface SiteSettings {
+    key: string;
+    value: any;
+}
+
+export const getSiteSettings = async (key: string) => {
+    try {
+        const { data, error } = await supabase
+            .from('site_settings')
+            .select('value')
+            .eq('key', key)
+            .single();
+
+        if (error) {
+            if (error.code === 'PGRST116') return null; // Not found
+            // If table doesn't exist, we might get other errors, but we can't fix it from here.
+            // Silently return null for now to avoid crashing if table missing.
+            console.warn("Could not fetch site settings (table might be missing):", error.message);
+            return null;
+        }
+        return data.value;
+    } catch (error) {
+        console.error("Error fetching site settings:", error);
+        return null; // Return null on error to handle gracefully
+    }
+};
+
+export const saveSiteSettings = async (key: string, value: any) => {
+    try {
+        const { error } = await supabase
+            .from('site_settings')
+            .upsert({ key, value });
+
+        if (error) throw error;
+    } catch (error) {
+        console.error("Error saving site settings:", error);
+        throw error;
+    }
+};

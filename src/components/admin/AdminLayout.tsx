@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, Building, LogOut, Menu, X, Home, Calendar, Shield } from 'lucide-react';
+import { LayoutDashboard, Users, Building, LogOut, Menu, X, Home, Calendar, Shield, Settings } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const AdminLayout = () => {
@@ -18,6 +18,7 @@ const AdminLayout = () => {
         { path: '/admin/users', label: 'ユーザー管理', icon: <Users className="w-5 h-5" /> },
         { path: '/admin/clinics', label: 'クリニック管理', icon: <Building className="w-5 h-5" /> },
         { path: '/admin/audit-logs', label: '操作ログ', icon: <Shield className="w-5 h-5" /> },
+        { path: '/admin/settings', label: 'サイト設定', icon: <Settings className="w-5 h-5" /> },
     ];
 
     return (
