@@ -2045,7 +2045,7 @@ const FeaturesMainImageSettings = () => {
                 const targetR = 134;
                 const targetG = 154;
                 const targetB = 190;
-                const tolerance = 40; // Adjust tolerance
+                const tolerance = 10; // Adjust tolerance
 
                 for (let i = 0; i < data.length; i += 4) {
                     const r = data[i];
