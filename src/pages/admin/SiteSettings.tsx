@@ -1986,6 +1986,8 @@ const FeaturesMainImageSettings = () => {
         opacity: 100
     });
 
+    const [tolerance, setTolerance] = useState(20);
+
     useEffect(() => {
         loadSettings();
     }, []);
@@ -2045,7 +2047,6 @@ const FeaturesMainImageSettings = () => {
                 const targetR = 134;
                 const targetG = 154;
                 const targetB = 190;
-                const tolerance = 10; // Adjust tolerance
 
                 for (let i = 0; i < data.length; i += 4) {
                     const r = data[i];
@@ -2110,6 +2111,29 @@ const FeaturesMainImageSettings = () => {
                                 <p>推奨サイズ: 横幅1000px程度の画像</p>
                                 <p className="text-blue-600 mt-1">※背景色(#869abe)は自動的に透過されます。</p>
                             </div>
+
+                            {/* Tolerance Slider */}
+                            <div className="bg-blue-50 p-3 rounded-lg border border-blue-100 mt-2">
+                                <label className="block text-xs font-medium text-gray-700 mb-1">
+                                    背景除去の感度 (許容誤差): {tolerance}
+                                </label>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-xs text-gray-500">弱</span>
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="100"
+                                        value={tolerance}
+                                        onChange={(e) => setTolerance(parseInt(e.target.value))}
+                                        className="flex-1 h-1.5 bg-blue-200 rounded-lg appearance-none cursor-pointer"
+                                    />
+                                    <span className="text-xs text-gray-500">強</span>
+                                </div>
+                                <p className="text-[10px] text-gray-500 mt-1">
+                                    ※画像の線が消えない場合は数値を上げてください。色が消えすぎる場合は下げてください。調整後は再アップロードが必要です。
+                                </p>
+                            </div>
+
                             {settings.imageUrl && (
                                 <button
                                     onClick={() => setSettings(prev => ({ ...prev, imageUrl: '' }))}
