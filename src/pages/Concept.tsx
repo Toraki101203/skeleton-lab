@@ -1,9 +1,8 @@
-import PageLayout from '../components/PageLayout';
 import { ArrowDown } from 'lucide-react';
 
 const Concept = () => {
     return (
-        <PageLayout>
+        <>
             {/* Hero Section */}
             <section className="min-h-[90vh] flex flex-col items-center justify-center text-center px-6 relative">
                 <div className="z-10 animate-fade-in-up space-y-8">
@@ -89,7 +88,7 @@ const Concept = () => {
                     </p>
                 </div>
             </section>
-        </PageLayout>
+        </>
     );
 };
 

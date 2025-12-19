@@ -1,8 +1,7 @@
-import PageLayout from '../components/PageLayout';
 
 const FAQ = () => {
     return (
-        <PageLayout>
+        <div className="py-12 px-6">
             <h1 className="text-3xl font-bold text-white mb-8 text-center">よくある質問</h1>
             <div className="max-w-3xl mx-auto space-y-4 text-gray-800">
                 <div className="bg-white p-6 rounded-xl shadow-sm">
@@ -18,7 +17,7 @@ const FAQ = () => {
                     <p className="text-gray-600">A. あなたの症状や痛みの箇所を入力いただくことで、一般的な原因や推奨される施術内容を提示する機能です。医療診断ではありません。</p>
                 </div>
             </div>
-        </PageLayout>
+        </div>
     );
 };
 

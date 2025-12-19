@@ -27,6 +27,7 @@ import AttendanceManagement from './pages/clinic/AttendanceManagement';
 import ReservationManagement from './pages/clinic/ReservationManagement';
 import BookingWizard from './pages/booking/BookingWizard';
 import DiagnosisResult from './pages/user/DiagnosisResult';
+import MainLayout from './components/MainLayout';
 
 import Register from './pages/Register';
 
@@ -58,13 +59,20 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<Home />} />
+          {/* Public Routes with Main Layout */}
+          <Route element={<MainLayout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/concept" element={<Concept />} />
+            <Route path="/features" element={<Features />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/search" element={<ClinicSearch />} />
+          </Route>
+
+          {/* Independent Public Routes */}
           <Route path="/login" element={<Login />} />
-          <Route path="/concept" element={<Concept />} />
-          <Route path="/features" element={<Features />} />
-          <Route path="/faq" element={<FAQ />} />
-          <Route path="/register" element={<Register />} />
           <Route path="/clinic/:id" element={<ClinicDetail />} />
+
           <Route path="/booking" element={<BookingWizard />} />
 
           {/* Public Diagnosis Routes */}
@@ -75,8 +83,6 @@ function App() {
           <Route element={<ProtectedRoute allowedRoles={['user', 'super_admin']} />}>
             {/* Add user specific protected routes here if any */}
           </Route>
-
-          <Route path="/search" element={<ClinicSearch />} />
 
           {/* Clinic Admin Routes */}
           <Route element={<ProtectedRoute allowedRoles={['clinic_admin', 'super_admin']} />}>

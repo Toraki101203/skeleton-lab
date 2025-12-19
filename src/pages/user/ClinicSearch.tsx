@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { Search, MapPin, Clock, Navigation } from 'lucide-react';
-import PageLayout from '../../components/PageLayout';
 import { useClinicSearch } from '../../hooks/useClinicSearch';
 
 const PREFECTURES = [
@@ -34,7 +33,7 @@ const ClinicSearch = () => {
     } = useClinicSearch(initialState);
 
     return (
-        <PageLayout>
+        <div className="py-12">
             <div className="max-w-7xl mx-auto space-y-8">
                 {/* Header / Search Bar */}
                 <div className="bg-white/80 backdrop-blur-xl shadow-lg rounded-2xl p-6 border border-white/20 relative z-30">
@@ -215,7 +214,7 @@ const ClinicSearch = () => {
                     </div>
                 )}
             </div>
-        </PageLayout>
+        </div>
     );
 };
 

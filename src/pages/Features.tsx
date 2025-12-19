@@ -1,9 +1,8 @@
-import PageLayout from '../components/PageLayout';
 import { ArrowDown } from 'lucide-react';
 
 const Features = () => {
     return (
-        <PageLayout>
+        <>
             {/* Hero Section */}
             <section className="min-h-[80vh] flex flex-col items-center justify-center text-center px-6 relative">
                 <div className="z-10 animate-fade-in-up space-y-6">
@@ -57,7 +56,7 @@ const Features = () => {
                     </div>
                 </div>
             </section>
-        </PageLayout>
+        </>
     );
 };
 

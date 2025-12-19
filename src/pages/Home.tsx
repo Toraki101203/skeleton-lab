@@ -1,18 +1,9 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import PageLayout from '../components/PageLayout';
 import { Activity, Clock } from 'lucide-react';
 import { getSiteSettings } from '../services/db';
 
 const Home = () => {
-    const [logoSettings, setLogoSettings] = useState<{
-        imageUrl: string;
-        height: string;
-        positionTop: string;
-        positionLeft: string;
-        opacity: number;
-    } | null>(null);
-
     const [illustrationSettings, setIllustrationSettings] = useState<{
         imageUrl: string;
         height: string;
@@ -31,11 +22,6 @@ const Home = () => {
 
     useEffect(() => {
         const fetchSettings = async () => {
-            const data = await getSiteSettings('home_logo_settings');
-            if (data && data.imageUrl) {
-                setLogoSettings(data);
-            }
-
             const illusData = await getSiteSettings('home_illustration_settings');
             if (illusData) {
                 setIllustrationSettings(illusData);
@@ -56,21 +42,7 @@ const Home = () => {
     }, []);
 
     return (
-        <PageLayout>
-            {/* Custom Admin Configured Logo */}
-            {logoSettings && (
-                <img
-                    src={logoSettings.imageUrl}
-                    alt="Site Logo"
-                    className="fixed z-[60] pointer-events-none transition-all duration-300 ease-in-out"
-                    style={{
-                        height: logoSettings.height,
-                        top: logoSettings.positionTop,
-                        left: logoSettings.positionLeft,
-                        opacity: (logoSettings.opacity ?? 100) / 100
-                    }}
-                />
-            )}
+        <>
 
             <div className="text-center mb-12">
                 <h1 className="text-2xl md:text-3xl font-bold mb-4 leading-relaxed">
@@ -194,7 +166,7 @@ const Home = () => {
                     <Activity className="mr-2" /> 診断のモニタリング
                 </Link>
             </div>
-        </PageLayout>
+        </>
     );
 };
 

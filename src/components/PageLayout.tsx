@@ -19,11 +19,24 @@ const PageLayout = ({ children, className = "" }: PageLayoutProps) => {
         opacity: number;
     } | null>(null);
 
+    const [logoSettings, setLogoSettings] = useState<{
+        imageUrl: string;
+        height: string;
+        positionTop: string;
+        positionLeft: string;
+        opacity: number;
+    } | null>(null);
+
     useEffect(() => {
         const fetchSettings = async () => {
             const data = await getSiteSettings('background_decor_settings');
             if (data) {
                 setBgSettings(data);
+            }
+
+            const logoData = await getSiteSettings('home_logo_settings');
+            if (logoData && logoData.imageUrl) {
+                setLogoSettings(logoData);
             }
         };
         fetchSettings();
@@ -32,6 +45,21 @@ const PageLayout = ({ children, className = "" }: PageLayoutProps) => {
     return (
         <div className="min-h-screen bg-primary text-white font-sans relative overflow-hidden flex flex-col">
             <Header />
+
+            {/* Global Logo */}
+            {logoSettings && (
+                <img
+                    src={logoSettings.imageUrl}
+                    alt="Site Logo"
+                    className="fixed z-[60] pointer-events-none transition-all duration-300 ease-in-out"
+                    style={{
+                        height: logoSettings.height,
+                        top: logoSettings.positionTop,
+                        left: logoSettings.positionLeft,
+                        opacity: (logoSettings.opacity ?? 100) / 100
+                    }}
+                />
+            )}
 
             {/* Background Decorations */}
             {bgSettings && bgSettings.imageUrl && (

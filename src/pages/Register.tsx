@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import PageLayout from '../components/PageLayout';
 import type { UserRole } from '../types';
 
 const Register = () => {
@@ -33,7 +32,7 @@ const Register = () => {
     };
 
     return (
-        <PageLayout>
+        <>
             <div className="max-w-md mx-auto bg-white p-8 rounded-xl shadow-lg mt-10 text-gray-800">
                 <h2 className="text-2xl font-bold text-center mb-6 text-primary">新規登録</h2>
 
@@ -103,7 +102,7 @@ const Register = () => {
                     </p>
                 </div>
             </div>
-        </PageLayout>
+        </>
     );
 };
 
