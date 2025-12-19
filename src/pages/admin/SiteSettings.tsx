@@ -374,6 +374,9 @@ const SiteSettings = () => {
             {/* Home Left Illustration Settings */}
             <HomeLeftIllustrationSettings />
 
+            {/* Footer Logo Settings */}
+            <FooterLogoSettings />
+
             {/* Help Section */}
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-800">
                 <div className="flex items-start gap-2">
@@ -2182,6 +2185,156 @@ const FeaturesMainImageSettings = () => {
                                 value={settings.positionTop}
                                 onChange={(e) => setSettings({ ...settings, positionTop: e.target.value })}
                                 placeholder="例: 40px, 2rem"
+                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">不透明度 (Opacity) %</label>
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="range"
+                                min="0"
+                                max="100"
+                                value={settings.opacity}
+                                onChange={(e) => setSettings({ ...settings, opacity: parseInt(e.target.value) })}
+                                className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                            />
+                            <span className="w-12 text-right font-mono">{settings.opacity}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="p-6 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+                <div className="flex-1">
+                    {message && (
+                        <div className={`text-sm flex items-center ${message.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                            {message.type === 'error' && <AlertTriangle className="w-4 h-4 mr-2" />}
+                            {message.text}
+                        </div>
+                    )}
+                </div>
+                <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 shadow-sm"
+                >
+                    {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    保存する
+                </button>
+            </div>
+        </div>
+    );
+};
+
+const FooterLogoSettings = () => {
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+    const [settings, setSettings] = useState<LogoSettings>({
+        imageUrl: '',
+        height: '40px',
+        positionTop: '',
+        positionLeft: '',
+        opacity: 100
+    });
+
+    useEffect(() => {
+        loadSettings();
+    }, []);
+
+    const loadSettings = async () => {
+        setLoading(true);
+        try {
+            const data = await getSiteSettings('footer_logo_settings');
+            if (data) {
+                setSettings({
+                    imageUrl: data.imageUrl || '',
+                    height: data.height || '40px',
+                    positionTop: data.positionTop || '',
+                    positionLeft: data.positionLeft || '',
+                    opacity: data.opacity ?? 100
+                });
+            }
+        } catch (error) {
+            console.error('Failed to load settings', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSave = async () => {
+        setSaving(true);
+        setMessage(null);
+        try {
+            await saveSiteSettings('footer_logo_settings', settings);
+            setMessage({ type: 'success', text: '設定を保存しました' });
+        } catch (error) {
+            console.error('Failed to save settings', error);
+            setMessage({ type: 'error', text: '保存に失敗しました' });
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleImageUpload = (url: string) => {
+        setSettings(prev => ({ ...prev, imageUrl: url }));
+    };
+
+    if (loading) return <div className="p-4 text-center text-gray-500">読み込み中...</div>;
+
+    return (
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="p-6 border-b border-gray-100">
+                <h2 className="text-lg font-bold text-gray-800">フッターロゴ画像設定</h2>
+                <p className="text-sm text-gray-500 mt-1">フッターに表示するロゴ画像を設定します。</p>
+            </div>
+
+            <div className="p-6 space-y-8">
+                {/* Image Upload */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">画像</label>
+                    <div className="flex items-start gap-6">
+                        <div className="w-48 h-48 bg-slate-700 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center overflow-hidden relative">
+                            {settings.imageUrl ? (
+                                <img
+                                    src={settings.imageUrl}
+                                    alt="Preview"
+                                    className="max-w-full max-h-full object-contain"
+                                />
+                            ) : (
+                                <span className="text-gray-400 text-sm">画像なし</span>
+                            )}
+                        </div>
+                        <div className="flex-1 space-y-4">
+                            <ImageUploader onUpload={handleImageUpload} label="ロゴをアップロード" />
+                            <div className="text-xs text-gray-500">
+                                <p>推奨サイズ: 横長または正方形の透過PNG</p>
+                            </div>
+                            {settings.imageUrl && (
+                                <button
+                                    onClick={() => setSettings(prev => ({ ...prev, imageUrl: '' }))}
+                                    className="text-sm text-red-500 hover:underline"
+                                >
+                                    画像を削除
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Layout Settings */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">高さ・サイズ (Height)</label>
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="text"
+                                value={settings.height}
+                                onChange={(e) => setSettings({ ...settings, height: e.target.value })}
+                                placeholder="例: 40px"
                                 className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
                             />
                         </div>

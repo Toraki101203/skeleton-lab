@@ -104,7 +104,7 @@ const PageLayout = ({ children, className = "" }: PageLayoutProps) => {
             {/* Global Left Illustration (Hidden on Features Page) */}
             {!isFeaturesPage && leftIllustrationSettings && leftIllustrationSettings.imageUrl && (
                 <div
-                    className="absolute pointer-events-none z-[55] hidden md:block" // Slightly lower z-index than logo (60)
+                    className="absolute pointer-events-none z-0 hidden md:block" // Changed from z-[55] to z-0 to avoid overlapping content
                     style={{
                         height: leftIllustrationSettings.height,
                         top: leftIllustrationSettings.positionTop || '50%',
