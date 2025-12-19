@@ -12,13 +12,6 @@ const Home = () => {
         opacity: number;
     } | null>(null);
 
-    const [leftIllustrationSettings, setLeftIllustrationSettings] = useState<{
-        imageUrl: string;
-        height: string;
-        positionTop?: string;
-        positionLeft?: string;
-        opacity: number;
-    } | null>(null);
 
     useEffect(() => {
         const fetchSettings = async () => {
@@ -33,10 +26,6 @@ const Home = () => {
                 });
             }
 
-            const leftData = await getSiteSettings('home_left_illustration_settings');
-            if (leftData) {
-                setLeftIllustrationSettings(leftData);
-            }
         };
         fetchSettings();
     }, []);
@@ -136,25 +125,6 @@ const Home = () => {
                     </div>
                 )}
 
-                {/* Left Illustration (Absolute) */}
-                {leftIllustrationSettings && leftIllustrationSettings.imageUrl && (
-                    <div
-                        className="absolute pointer-events-none z-30 hidden md:block" // Increased z-index
-                        style={{
-                            height: leftIllustrationSettings.height,
-                            top: leftIllustrationSettings.positionTop || '50%',
-                            left: leftIllustrationSettings.positionLeft || '-60px', // Default pushed out slightly
-                            transform: !leftIllustrationSettings.positionTop ? 'translateY(-50%)' : undefined, // Center vertically if no top set
-                            opacity: (leftIllustrationSettings.opacity ?? 100) / 100
-                        }}
-                    >
-                        <img
-                            src={leftIllustrationSettings.imageUrl}
-                            alt=""
-                            className="object-contain w-auto h-full"
-                        />
-                    </div>
-                )}
             </div>
 
             {/* Bottom Buttons */}
