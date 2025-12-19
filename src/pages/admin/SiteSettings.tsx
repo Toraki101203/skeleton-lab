@@ -2090,6 +2090,19 @@ const FeaturesMainImageSettings = () => {
                     </div>
 
                     <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">高さ (Height)</label>
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="text"
+                                value={settings.height}
+                                onChange={(e) => setSettings({ ...settings, height: e.target.value })}
+                                placeholder="例: auto, 300px"
+                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                            />
+                        </div>
+                    </div>
+
+                    <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">上からの余白 (Margin Top)</label>
                         <div className="flex items-center gap-2">
                             <input
