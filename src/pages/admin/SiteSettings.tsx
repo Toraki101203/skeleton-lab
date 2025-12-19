@@ -1859,7 +1859,15 @@ const FeaturesLeftDecorSettings = () => {
                     </div>
                 </div>
             </div>
-            <div className="p-6 bg-gray-50 border-t border-gray-100 flex justify-end">
+            <div className="p-6 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+                <div className="flex-1">
+                    {message && (
+                        <div className={`text-sm flex items-center ${message.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                            {message.type === 'error' && <AlertTriangle className="w-4 h-4 mr-2" />}
+                            {message.text}
+                        </div>
+                    )}
+                </div>
                 <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg font-bold hover:bg-primary/90 transition-colors disabled:opacity-50">
                     {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} 保存する
                 </button>
@@ -1967,7 +1975,15 @@ const FeaturesRightDecorSettings = () => {
                     </div>
                 </div>
             </div>
-            <div className="p-6 bg-gray-50 border-t border-gray-100 flex justify-end">
+            <div className="p-6 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+                <div className="flex-1">
+                    {message && (
+                        <div className={`text-sm flex items-center ${message.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                            {message.type === 'error' && <AlertTriangle className="w-4 h-4 mr-2" />}
+                            {message.text}
+                        </div>
+                    )}
+                </div>
                 <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg font-bold hover:bg-primary/90 transition-colors disabled:opacity-50">
                     {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} 保存する
                 </button>
