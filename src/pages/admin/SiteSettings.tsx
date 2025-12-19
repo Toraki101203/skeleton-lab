@@ -2028,6 +2028,49 @@ const FeaturesMainImageSettings = () => {
         setSettings(prev => ({ ...prev, imageUrl: url }));
     };
 
+    const removeBackgroundColor = (file: File): Promise<File | Blob> => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) return reject(new Error('Canvas context not available'));
+
+                ctx.drawImage(img, 0, 0);
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imageData.data;
+                // Target Color: #869abe (R:134, G:154, B:190)
+                const targetR = 134;
+                const targetG = 154;
+                const targetB = 190;
+                const tolerance = 40; // Adjust tolerance
+
+                for (let i = 0; i < data.length; i += 4) {
+                    const r = data[i];
+                    const g = data[i + 1];
+                    const b = data[i + 2];
+
+                    if (
+                        Math.abs(r - targetR) < tolerance &&
+                        Math.abs(g - targetG) < tolerance &&
+                        Math.abs(b - targetB) < tolerance
+                    ) {
+                        data[i + 3] = 0; // Alpha to 0
+                    }
+                }
+                ctx.putImageData(imageData, 0, 0);
+                canvas.toBlob((blob) => {
+                    if (blob) resolve(blob);
+                    else reject(new Error('Canvas to Blob failed'));
+                }, 'image/png');
+            };
+            img.onerror = (e) => reject(e);
+            img.src = URL.createObjectURL(file);
+        });
+    };
+
     if (loading) return <div className="p-4 text-center text-gray-500">読み込み中...</div>;
 
     return (
@@ -2058,9 +2101,14 @@ const FeaturesMainImageSettings = () => {
                             )}
                         </div>
                         <div className="flex-1 space-y-4">
-                            <ImageUploader onUpload={handleImageUpload} label="画像をアップロード" />
+                            <ImageUploader
+                                onUpload={handleImageUpload}
+                                label="画像をアップロード"
+                                transformFile={removeBackgroundColor}
+                            />
                             <div className="text-xs text-gray-500">
                                 <p>推奨サイズ: 横幅1000px程度の画像</p>
+                                <p className="text-blue-600 mt-1">※背景色(#869abe)は自動的に透過されます。</p>
                             </div>
                             {settings.imageUrl && (
                                 <button

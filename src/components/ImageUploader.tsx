@@ -6,26 +6,33 @@ interface Props {
     onUpload: (url: string) => void;
     className?: string;
     label?: string;
+    transformFile?: (file: File) => Promise<File | Blob>;
 }
 
-const ImageUploader: React.FC<Props> = ({ onUpload, className = '', label = '画像をアップロード' }) => {
+const ImageUploader: React.FC<Props> = ({ onUpload, className = '', label = '画像をアップロード', transformFile }) => {
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files || e.target.files.length === 0) return;
 
-        const file = e.target.files[0];
+        const originalFile = e.target.files[0];
         setUploading(true);
 
         try {
-            const fileExt = file.name.split('.').pop();
+            let fileToUpload: File | Blob = originalFile;
+            if (transformFile) {
+                fileToUpload = await transformFile(originalFile);
+            }
+
+            // Keep extension from original file if possible, or default to png if transformed (since canvas output is usually png)
+            const fileExt = originalFile.name.split('.').pop();
             const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
             const filePath = `${fileName}`;
 
             const { error: uploadError } = await supabase.storage
                 .from('clinic-assets')
-                .upload(filePath, file);
+                .upload(filePath, fileToUpload);
 
             if (uploadError) throw uploadError;
 
