@@ -44,21 +44,28 @@ const PageLayout = ({ children, className = "" }: PageLayoutProps) => {
         opacity: number;
     } | null>(null);
 
+    const [isLoading, setIsLoading] = useState(true);
+
     useEffect(() => {
         const fetchSettings = async () => {
-            const data = await getSiteSettings('background_decor_settings');
-            if (data) {
-                setBgSettings(data);
-            }
+            try {
+                const bgData = await getSiteSettings('background_decor_settings');
+                if (bgData) {
+                    setBgSettings(bgData);
+                }
 
-            const logoData = await getSiteSettings('home_logo_settings');
-            if (logoData && logoData.imageUrl) {
-                setLogoSettings(logoData);
-            }
+                const logoData = await getSiteSettings('home_logo_settings');
+                if (logoData && logoData.imageUrl) {
+                    setLogoSettings(logoData);
+                }
 
-            const leftData = await getSiteSettings('home_left_illustration_settings');
-            if (leftData) {
-                setLeftIllustrationSettings(leftData);
+                const leftData = await getSiteSettings('home_left_illustration_settings');
+                if (leftData) {
+                    setLeftIllustrationSettings(leftData);
+                }
+            } finally {
+                // simple timeout to ensure smooth transition even if fetch is instant
+                setTimeout(() => setIsLoading(false), 100);
             }
         };
         fetchSettings();
@@ -75,12 +82,12 @@ const PageLayout = ({ children, className = "" }: PageLayoutProps) => {
             {logoSettings && (
                 <Link
                     to="/"
-                    className={`absolute z-[60] cursor-pointer transition-all duration-300 ease-in-out hover:opacity-80 flex items-center ${logoSettings.hasFrame ? 'bg-white border-primary shadow-lg' : ''}`}
+                    className={`absolute z-[60] cursor-pointer transition-all duration-500 ease-in-out hover:opacity-80 flex items-center ${logoSettings.hasFrame ? 'bg-white border-primary shadow-lg' : ''} ${isLoading ? 'opacity-0' : 'opacity-100'}`}
                     style={{
                         height: logoSettings.height,
                         top: logoSettings.positionTop,
                         left: logoSettings.positionLeft,
-                        opacity: (logoSettings.opacity ?? 100) / 100,
+                        opacity: isLoading ? 0 : (logoSettings.opacity ?? 100) / 100,
                         // Dynamic frame styles
                         paddingTop: logoSettings.hasFrame ? logoSettings.framePaddingTop : '0',
                         paddingBottom: logoSettings.hasFrame ? logoSettings.framePaddingBottom : '0',
@@ -104,13 +111,13 @@ const PageLayout = ({ children, className = "" }: PageLayoutProps) => {
             {/* Global Left Illustration (Hidden on Features Page) */}
             {!isFeaturesPage && leftIllustrationSettings && leftIllustrationSettings.imageUrl && (
                 <div
-                    className="absolute pointer-events-none z-0 hidden md:block" // Changed from z-[55] to z-0 to avoid overlapping content
+                    className={`absolute pointer-events-none z-0 hidden md:block transition-opacity duration-700 ease-in-out ${isLoading ? 'opacity-0' : 'opacity-100'}`} // Changed from z-[55] to z-0 to avoid overlapping content
                     style={{
                         height: leftIllustrationSettings.height,
                         top: leftIllustrationSettings.positionTop || '50%',
                         left: leftIllustrationSettings.positionLeft || '-60px',
                         transform: !leftIllustrationSettings.positionTop ? 'translateY(-50%)' : undefined,
-                        opacity: (leftIllustrationSettings.opacity ?? 100) / 100
+                        opacity: isLoading ? 0 : (leftIllustrationSettings.opacity ?? 100) / 100
                     }}
                 >
                     <img
@@ -124,13 +131,13 @@ const PageLayout = ({ children, className = "" }: PageLayoutProps) => {
             {/* Background Decorations (Hidden on Features Page) */}
             {!isFeaturesPage && bgSettings && bgSettings.imageUrl && (
                 <div
-                    className="absolute pointer-events-none transition-all duration-300 ease-in-out z-0"
+                    className={`absolute pointer-events-none transition-all duration-1000 ease-in-out z-0 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
                     style={{
                         top: bgSettings.positionTop,
                         left: bgSettings.positionLeft,
                         right: bgSettings.positionRight,
                         height: bgSettings.height,
-                        opacity: (bgSettings.opacity ?? 10) / 100
+                        opacity: isLoading ? 0 : (bgSettings.opacity ?? 10) / 100
                     }}
                 >
                     <img
