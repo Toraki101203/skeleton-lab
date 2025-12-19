@@ -122,11 +122,6 @@ const Features = () => {
                     </div>
                 </section>
 
-                {/* Main Features Image */}
-                <FeaturesMainImage />
-
-                {/* Features Grid Section Removed as per request */}
-
                 {/* Bottom Custom Shape */}
                 <div className="absolute bottom-0 left-0 w-full leading-[0] pointer-events-none">
                     <svg
@@ -138,6 +133,9 @@ const Features = () => {
                     </svg>
                 </div>
             </div>
+
+            {/* Main Features Image */}
+            <FeaturesMainImage />
         </div>
     );
 };
