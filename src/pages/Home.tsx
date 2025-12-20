@@ -34,7 +34,13 @@ const Home = () => {
         <>
 
             <div className="text-center mb-12">
-                <h1 className="text-2xl md:text-3xl font-bold mb-4 leading-relaxed">
+                <h1
+                    className="text-2xl md:text-3xl font-bold mb-4 leading-relaxed relative z-50"
+                    style={{
+                        WebkitTextStroke: '4px #869ABE',
+                        paintOrder: 'stroke fill'
+                    }}
+                >
                     モニター診断のための問診票
                 </h1>
             </div>

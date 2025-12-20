@@ -181,11 +181,23 @@ const Concept = () => {
             {/* Hero Section */}
             <section className="min-h-[45vh] flex flex-col items-center justify-start text-center px-6 relative pt-16 md:pt-24">
                 <div className="z-10 space-y-2">
-                    <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight tracking-tighter drop-shadow-md">
+                    <h1
+                        className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight tracking-tighter drop-shadow-md"
+                        style={{
+                            WebkitTextStroke: '8px #869ABE',
+                            paintOrder: 'stroke fill'
+                        }}
+                    >
                         カラダかろやか、<br className="md:hidden" />
                         ココロまろやか
                     </h1>
-                    <p className="text-base md:text-xl text-white/95 font-medium tracking-[0.2em] drop-shadow-sm">
+                    <p
+                        className="text-base md:text-xl text-white/95 font-medium tracking-[0.2em] drop-shadow-sm"
+                        style={{
+                            WebkitTextStroke: '4px #869ABE',
+                            paintOrder: 'stroke fill'
+                        }}
+                    >
                         ～体が整うと、暮らしの質がもっと高まる～
                     </p>
                 </div>
@@ -206,12 +218,19 @@ const Concept = () => {
 
                     <div className="space-y-8 text-gray-700 leading-loose text-xl md:text-2xl font-medium tracking-widest">
                         <p>
-                            Skeleton Lab. は、整骨院、整体院、鍼灸院など、<br className="hidden md:block" />
-                            施術施設を中心とした新しいプラットフォームです。
+                            スケルトン Lab. は、整骨院、整体院、鍼灸院など、<br className="hidden md:block" />
+                            施術施設を中心とした新しい形の検索・予約プラットフォームです。
                         </p>
                         <p>
-                            ただ探すだけではなく、あなたの「カラダ」と「ココロ」に<br className="hidden md:block" />
-                            本当に合う場所を見つけるお手伝いをします。
+                            「肩が凝る」「腰が痛い」など症状からの検索や、<br className="hidden md:block" />
+                            お住まいのエリアに近いところからの検索、<br className="hidden md:block" />
+                            また「なんとなく体調が優れない」「症状を診てもらいながら相談したい」<br className="hidden md:block" />
+                            という方のために専門家によるモニター診断（予約制）もご用意しております。
+                        </p>
+                        <p>
+                            ボディバランスと骨格の健康を第一に、<br className="hidden md:block" />
+                            体を 整える ことでより充実した日々をお過ごしいただきたい。<br className="hidden md:block" />
+                            それがスケルトン Lab. の願いです。
                         </p>
                     </div>
 
