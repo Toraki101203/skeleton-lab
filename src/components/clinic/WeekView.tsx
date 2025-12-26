@@ -67,7 +67,7 @@ const WeekView = ({ currentDate, reservations, onReservationClick, onNewReservat
                                             <div
                                                 key={res.id}
                                                 onClick={() => onReservationClick(res)}
-                                                className="relative z-10 mb-1 p-1 rounded bg-blue-100 border-l-2 border-blue-500 text-[10px] cursor-pointer hover:brightness-95 truncate"
+                                                className="relative z-10 mb-1 p-1 rounded bg-blue-100 border-l-2 border-blue-500 text-[10px] text-blue-900 cursor-pointer hover:brightness-95 truncate"
                                             >
                                                 {res.startTime} {res.patientName}
                                             </div>

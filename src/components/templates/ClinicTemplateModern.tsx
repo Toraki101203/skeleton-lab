@@ -158,6 +158,36 @@ const ClinicTemplateModern: React.FC<Props> = ({ clinic, onBooking }) => {
                 </div>
             </section>
 
+            {/* Director Section */}
+            {clinic.directorInfo && clinic.directorInfo.name && (
+                <section className="py-32 px-6 bg-slate-900/30">
+                    <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-20 items-center">
+                        <div className="order-2 md:order-1">
+                            <h2 className="text-xs font-bold text-blue-500 uppercase tracking-[0.3em] mb-4">Director</h2>
+                            <h3 className="text-4xl font-bold text-white mb-6 leading-tight">
+                                {clinic.directorInfo.title}<br />
+                                {clinic.directorInfo.name}
+                            </h3>
+                            <p className="text-slate-400 leading-loose text-lg font-light whitespace-pre-wrap">
+                                {clinic.directorInfo.message}
+                            </p>
+                        </div>
+                        <div className="relative order-1 md:order-2">
+                            <div className="aspect-square overflow-hidden bg-slate-900 border border-white/5 relative">
+                                <div className="absolute inset-0 bg-blue-500/10 mix-blend-overlay"></div>
+                                <img
+                                    src={clinic.directorInfo.imageUrl || 'https://via.placeholder.com/400x500'}
+                                    alt={clinic.directorInfo.name}
+                                    className="w-full h-full object-cover opacity-90 hover:opacity-100 hover:scale-105 transition-all duration-700"
+                                />
+                            </div>
+                            <div className="absolute -bottom-6 -right-6 w-32 h-32 border border-blue-500/20 -z-10"></div>
+                            <div className="absolute -top-6 -left-6 w-32 h-32 border border-white/10 -z-10"></div>
+                        </div>
+                    </div>
+                </section>
+            )}
+
             {/* Menu Section */}
             {
                 clinic.menuItems && clinic.menuItems.length > 0 && (

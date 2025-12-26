@@ -73,21 +73,41 @@ const ReservationManagement = () => {
 
                     const bookings = await getClinicBookings(clinicData.id, startOfDay, endOfDay);
 
-                    const mappedReservations: Reservation[] = bookings.map(b => ({
-                        id: b.id!,
-                        clinicId: b.clinicId,
-                        patientName: b.guestName || '会員様', // TODO: Fetch user profile name
-                        patientEmail: b.guestEmail,
-                        patientPhone: b.guestContact,
-                        staffId: b.staffId || 'free', // Map null to 'free'
-                        menuItemId: b.menuItemId,
-                        date: b.startTime.toISOString().split('T')[0],
-                        startTime: b.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                        endTime: b.endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                        status: b.status as any,
-                        notes: b.notes,
-                        createdAt: new Date().toISOString() // Not in type but ok
-                    }));
+                    console.log('DEBUG: Bookings fetched', bookings.map(b => ({
+                        id: b.id,
+                        rawStart: b.startTime,
+                        isoStart: b.startTime instanceof Date ? b.startTime.toISOString() : 'not-date',
+                        localHours: b.startTime instanceof Date ? b.startTime.getHours() : 'err'
+                    })));
+
+                    const mappedReservations: Reservation[] = bookings.map(b => {
+                        const dateStr = [
+                            b.startTime.getFullYear(),
+                            String(b.startTime.getMonth() + 1).padStart(2, '0'),
+                            String(b.startTime.getDate()).padStart(2, '0')
+                        ].join('-');
+
+                        const startH = String(b.startTime.getHours()).padStart(2, '0');
+                        const startM = String(b.startTime.getMinutes()).padStart(2, '0');
+                        const endH = String(b.endTime.getHours()).padStart(2, '0');
+                        const endM = String(b.endTime.getMinutes()).padStart(2, '0');
+
+                        return {
+                            id: b.id!,
+                            clinicId: b.clinicId,
+                            patientName: b.guestName || '会員様', // TODO: Fetch user profile name
+                            patientEmail: b.guestEmail,
+                            patientPhone: b.guestContact,
+                            staffId: b.staffId || 'free', // Map null to 'free'
+                            menuItemId: b.menuItemId,
+                            date: dateStr,
+                            startTime: `${startH}:${startM}`,
+                            endTime: `${endH}:${endM}`,
+                            status: b.status as any,
+                            notes: b.notes,
+                            createdAt: new Date().toISOString() // Not in type but ok
+                        };
+                    });
 
                     setReservations(mappedReservations);
                 }
@@ -246,7 +266,7 @@ const ReservationManagement = () => {
                             <div className="space-y-4">
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold text-gray-500">スタッフ</label>
-                                    <select className="w-full p-2 rounded-lg border border-gray-200 text-sm">
+                                    <select className="w-full p-2 rounded-lg border border-gray-200 text-sm bg-white text-gray-800">
                                         <option>全員表示</option>
                                         {staffList.map(s => <option key={s.id}>{s.name}</option>)}
                                     </select>
@@ -270,7 +290,7 @@ const ReservationManagement = () => {
                                 <input
                                     type="text"
                                     placeholder="患者様名・ID"
-                                    className="w-full p-2.5 rounded-xl border border-gray-200 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                                    className="w-full p-2.5 rounded-xl border border-gray-200 text-sm bg-white text-gray-800 placeholder-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                                 />
                                 <div className="flex gap-2">
                                     <button className="flex-1 bg-gray-800 text-white rounded-xl py-2 text-sm font-bold hover:bg-gray-700 transition-colors flex items-center justify-center gap-2">

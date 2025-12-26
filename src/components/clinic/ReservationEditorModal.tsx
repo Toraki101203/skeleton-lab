@@ -131,10 +131,12 @@ const ReservationEditorModal = ({ isOpen, onClose, initialReservation, staffList
             // We need to construct a Booking object. The type mapping might be tricky.
             // Let's create a Partial<Booking> that matches what createBooking/updateBooking expects.
 
-            // NOTE: The previous code was purely client-side mock based. 
-            // Now we are integrating DB.
-            // Reservation type is the frontend view, Booking is the DB type?
-            // Let's assume they are similar enough or map manually.
+            const [y, m, d] = reservation.date.split('-').map(Number);
+            const [sH, sM] = reservation.startTime.split(':').map(Number);
+            const [eH, eM] = reservation.endTime.split(':').map(Number);
+
+            const startDate = new Date(y, m - 1, d, sH, sM);
+            const endDate = new Date(y, m - 1, d, eH, eM);
 
             const bookingData: Partial<Booking> = {
                 clinicId: reservation.clinicId,
@@ -142,8 +144,8 @@ const ReservationEditorModal = ({ isOpen, onClose, initialReservation, staffList
                 staffId: reservation.staffId,
                 bookedBy: 'proxy', // Valid value
                 status: reservation.status as any, // Cast to any to avoid strict mismatch if types are slightly different
-                startTime: new Date(`${reservation.date}T${reservation.startTime}`),
-                endTime: new Date(`${reservation.date}T${reservation.endTime}`),
+                startTime: startDate,
+                endTime: endDate,
                 notes: reservation.notes,
                 guestName: reservation.patientName,
                 guestContact: reservation.patientPhone,
@@ -167,9 +169,9 @@ const ReservationEditorModal = ({ isOpen, onClose, initialReservation, staffList
 
             onSave(reservation);
             onClose();
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
-            alert('保存に失敗しました');
+            alert('保存に失敗しました: ' + (err.message || String(err)));
         } finally {
             setIsSubmitting(false);
         }

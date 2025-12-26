@@ -170,6 +170,35 @@ const ClinicTemplateStandard: React.FC<Props> = ({ clinic, onBooking }) => {
                 </div>
             </section>
 
+            {/* Director Section */}
+            {clinic.directorInfo && clinic.directorInfo.name && (
+                <section className="py-24 px-4 sm:px-6 bg-gray-50">
+                    <div className="max-w-4xl mx-auto">
+                        <div className="text-center mb-16">
+                            <span className="text-blue-600 font-bold tracking-widest uppercase text-sm">Director</span>
+                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">院長挨拶</h2>
+                            <div className="w-16 h-1 bg-blue-600 mx-auto mt-6"></div>
+                        </div>
+                        <div className="bg-white p-8 md:p-12 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-8 items-center">
+                            <div className="w-48 h-48 shrink-0 rounded-full overflow-hidden shadow-lg border-4 border-gray-100">
+                                <img
+                                    src={clinic.directorInfo.imageUrl || 'https://via.placeholder.com/300'}
+                                    alt={clinic.directorInfo.name}
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                            <div className="flex-1 text-center md:text-left">
+                                <h3 className="text-blue-600 font-bold mb-2 tracking-wide uppercase text-sm">{clinic.directorInfo.title}</h3>
+                                <h2 className="text-2xl font-bold text-gray-900 mb-4">{clinic.directorInfo.name}</h2>
+                                <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">
+                                    {clinic.directorInfo.message}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            )}
+
             {/* News Section */}
             {clinic.newsItems && clinic.newsItems.length > 0 && (
                 <section id="news" className="py-24 px-4 sm:px-6 bg-gray-50">

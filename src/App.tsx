@@ -27,6 +27,8 @@ import AttendanceManagement from './pages/clinic/AttendanceManagement';
 import ReservationManagement from './pages/clinic/ReservationManagement';
 import BookingWizard from './pages/booking/BookingWizard';
 import DiagnosisResult from './pages/user/DiagnosisResult';
+import StaffShiftSubmission from './pages/staff/ShiftSubmission';
+import StaffTimeCard from './pages/staff/StaffTimeCard';
 import MainLayout from './components/MainLayout';
 
 import Register from './pages/Register';
@@ -94,6 +96,10 @@ function App() {
             <Route path="/clinic/attendance" element={<AttendanceManagement />} />
             <Route path="/clinic/reservations" element={<ReservationManagement />} />
           </Route>
+
+          {/* Shift Submission - Public for transparency/ease (could be protected by simple pass in future) */}
+          <Route path="/staff-submission/:clinicId" element={<StaffShiftSubmission />} />
+          <Route path="/staff-timecard/:clinicId" element={<StaffTimeCard />} />
 
           {/* Super Admin Routes */}
           <Route element={<ProtectedRoute allowedRoles={['super_admin']} />}>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Search, Building, MapPin, CheckCircle, XCircle, AlertCircle, Edit } from 'lucide-react';
-import { getAllClinics, updateClinicProfile } from '../../services/db';
+import { Search, Building, MapPin, CheckCircle, XCircle, AlertCircle, Edit, Trash2 } from 'lucide-react';
+import { getAllClinics, updateClinicProfile, deleteClinic } from '../../services/db';
 import type { Clinic } from '../../types';
 import { useNavigate } from 'react-router-dom';
 
@@ -33,9 +33,21 @@ const ClinicManagement = () => {
         try {
             await updateClinicProfile(clinicId, { status: newStatus });
             setClinics(clinics.map(c => c.id === clinicId ? { ...c, status: newStatus } : c));
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error updating status:', error);
-            alert('ステータスの更新に失敗しました');
+            alert(`ステータスの更新に失敗しました: ${error.message || JSON.stringify(error)}`);
+        }
+    };
+
+    const handleDelete = async (clinicId: string) => {
+        if (!confirm('本当にこのクリニックを削除しますか？\nこの操作は取り消せません。')) return;
+
+        try {
+            await deleteClinic(clinicId);
+            setClinics(clinics.filter(c => c.id !== clinicId));
+        } catch (error: any) {
+            console.error('Error deleting clinic:', error);
+            alert(`クリニックの削除に失敗しました: ${error.message || JSON.stringify(error)}`);
         }
     };
 
@@ -181,6 +193,13 @@ const ClinicManagement = () => {
                                                     className="p-2 text-gray-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
                                                 >
                                                     <Edit className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(clinic.id)}
+                                                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                    title="削除"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
                                                 </button>
                                             </div>
                                             <div className="text-xs text-gray-400 font-mono mt-2">ID: {clinic.id}</div>

@@ -110,14 +110,23 @@ const Features = () => {
                 {/* Hero Section */}
                 <section className="relative pb-20 flex flex-col items-center text-center px-6">
                     <div className="z-10 animate-fade-in-up flex flex-col items-center">
-                        <span className="text-[70px] font-black text-[#444] tracking-[0.25em] mt-[10px] leading-none">
+                        <span
+                            className="text-[80px] font-black text-[#444] tracking-[0.25em] mt-[20px] leading-none"
+                            style={{ WebkitTextStroke: '3px #fff', paintOrder: 'stroke fill' }}
+                        >
                             キモチよりそう
                         </span>
-                        <h1 className="text-[70px] font-black text-[#333] tracking-[0.25em] mb-12 font-sans leading-none">
+                        <h1
+                            className="text-[80px] font-black text-[#333] tracking-[0.25em] mb-12 font-sans leading-none"
+                            style={{ WebkitTextStroke: '3px #fff', paintOrder: 'stroke fill' }}
+                        >
                             Skeleton Lab.
                         </h1>
-                        <p className="text-[40px] text-gray-500 font-medium tracking-[0.3em]">
-                            あなたの健康な毎日をサポートする 3 つの特徴
+                        <p
+                            className="text-[50px] text-gray-500 font-medium tracking-[0.3em]"
+                            style={{ WebkitTextStroke: '4px #fff', paintOrder: 'stroke fill' }}
+                        >
+                            あなたの健康な毎日をサポートする3つの特徴
                         </p>
                     </div>
                 </section>

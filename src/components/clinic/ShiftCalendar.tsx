@@ -22,8 +22,13 @@ const ShiftCalendar = ({ staffList, shifts, currentDate, onDateChange, onDateCli
     const weekDays = ['日', '月', '火', '水', '木', '金', '土'];
 
     const getShiftsForDate = (date: Date) => {
-        const dateStr = date.toISOString().split('T')[0];
-        return shifts.filter(s => s.date === dateStr && !s.isHoliday);
+        // Use local date string to match DB 'YYYY-MM-DD' format
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`;
+        // Now include holidays too, but we will style them differently
+        return shifts.filter(s => s.date === dateStr);
     };
 
     const handlePrevMonth = () => {
@@ -104,6 +109,25 @@ const ShiftCalendar = ({ staffList, shifts, currentDate, onDateChange, onDateCli
                                 {dayShifts.slice(0, 3).map(shift => {
                                     const staff = staffList.find(s => s.id === shift.staffId);
                                     if (!staff) return null;
+
+                                    if (shift.isHoliday) {
+                                        return (
+                                            <div key={shift.id} className="flex items-center gap-1 text-xs text-red-600 bg-red-50/80 border border-red-100 rounded px-1.5 py-1 shadow-sm backdrop-blur-sm">
+                                                <div className="w-4 h-4 rounded-full bg-red-100 overflow-hidden shrink-0 border border-red-200">
+                                                    {staff.imageUrl ? (
+                                                        <img src={staff.imageUrl} alt="" className="w-full h-full object-cover opacity-80" />
+                                                    ) : (
+                                                        <User className="w-3 h-3 text-red-400 m-auto" />
+                                                    )}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="truncate font-bold text-red-700">{staff.name}</div>
+                                                    <div className="text-[10px] text-red-500 leading-none font-medium">休み</div>
+                                                </div>
+                                            </div>
+                                        );
+                                    }
+
                                     return (
                                         <div key={shift.id} className="flex items-center gap-1 text-xs text-gray-700 bg-white/80 border border-white/50 rounded px-1.5 py-1 shadow-sm backdrop-blur-sm">
                                             <div className="w-4 h-4 rounded-full bg-gray-200 overflow-hidden shrink-0 border border-white">
@@ -116,7 +140,7 @@ const ShiftCalendar = ({ staffList, shifts, currentDate, onDateChange, onDateCli
                                             <div className="flex-1 min-w-0">
                                                 <div className="truncate font-bold">{staff.name}</div>
                                                 <div className="text-[10px] text-gray-500 leading-none">
-                                                    {shift.startTime}-{shift.endTime}
+                                                    {shift.startTime.slice(0, 5)}-{shift.endTime.slice(0, 5)}
                                                 </div>
                                             </div>
                                         </div>

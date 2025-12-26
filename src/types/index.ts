@@ -140,6 +140,7 @@ export interface Shift {
 
 export interface AttendanceRecord {
     id: string;
+    clinicId: string;
     date: string;
     staffId: string;
     clockIn: string;

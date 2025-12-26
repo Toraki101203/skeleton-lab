@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import type { Clinic, Booking, AuditLog } from '../types';
+import type { Clinic, Booking, AuditLog, AttendanceRecord, Shift } from '../types';
 
 // --- User & Diagnosis ---
 
@@ -94,6 +94,21 @@ export const updateClinicProfile = async (clinicId: string, data: Partial<Clinic
     }
 };
 
+export const deleteClinic = async (clinicId: string) => {
+    try {
+        const { error, count } = await supabase
+            .from('clinics')
+            .delete({ count: 'exact' }) // Request exact count
+            .eq('id', clinicId);
+
+        if (error) throw error;
+        if (count === 0) throw new Error("削除対象が見つからないか、削除権限がありません。");
+    } catch (error) {
+        console.error("Error deleting clinic:", error);
+        throw error;
+    }
+};
+
 export const getAllClinics = async (): Promise<Clinic[]> => {
     try {
         const { data, error } = await supabase
@@ -129,16 +144,153 @@ export const getAllClinics = async (): Promise<Clinic[]> => {
 
 // --- Booking ---
 
+// --- Availability & Integrity Helpers ---
+
+/**
+ * Checks if a specific staff member is available for a given time slot.
+ * Returns true if available, throws error or returns false if not.
+ */
+export const checkStaffAvailability = async (clinicId: string, staffId: string, startTime: Date, endTime: Date): Promise<boolean> => {
+    const startIso = startTime.toISOString();
+    const endIso = endTime.toISOString();
+
+    // Fix: Use local YYYY-MM-DD for checking shifts, as shifts are stored without timezone info
+    // but implies local calendar date. isISOString() converts to UTC which might be Previous Day.
+    const year = startTime.getFullYear();
+    const month = String(startTime.getMonth() + 1).padStart(2, '0');
+    const day = String(startTime.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
+
+    // 1. Check Shift
+    const { data: shift, error: shiftError } = await supabase
+        .from('shifts')
+        .select('*')
+        .eq('clinic_id', clinicId)
+        .eq('staff_id', staffId)
+        .eq('date', dateStr)
+        .single();
+
+    if (shiftError && shiftError.code !== 'PGRST116') { // PGRST116 is "not found"
+        console.error("Error checking shift:", shiftError);
+        throw new Error("シフト情報の確認に失敗しました");
+    }
+
+    if (!shift) {
+        // No shift defined for this day -> Assuming "Not Working" if strict, or maybe "Default Schedule"?
+        // For robustness, if no shift explicitly created, we should ideally check default schedule or assume unavailable.
+        // Based on ShiftManagement.tsx, shifts are generated/saved. If missing, treat as unavailable.
+        return false;
+    }
+
+    if (shift.is_holiday) {
+        return false;
+    }
+
+    // Check if within working hours
+    // Shift times are usually "HH:mm:ss" string in DB
+    const shiftStart = new Date(`${dateStr}T${shift.start_time}`);
+    const shiftEnd = new Date(`${dateStr}T${shift.end_time}`);
+
+    // Adjust for timezone if needed, but assuming local time string in DB matches formatted date
+    // Simple string comparison for HH:mm might be safer if we strictly format
+
+    // String comparison: "09:00" <= "10:00"
+    // Only works if format is identical. 
+    // Let's use the Date objects created above for safer comparison if dates match
+    if (startTime < shiftStart || endTime > shiftEnd) {
+        return false;
+    }
+
+    // 2. Check Existing Bookings (Overlap)
+    const { data: conflicts, error: conflictError } = await supabase
+        .from('bookings')
+        .select('id')
+        .eq('clinic_id', clinicId)
+        .eq('staff_id', staffId)
+        .neq('status', 'cancelled') // Ignore cancelled
+        .lt('start_time', endIso)   // Existing start < New end
+        .gt('end_time', startIso);  // Existing end > New start
+
+    if (conflictError) {
+        console.error("Error checking overlaps:", conflictError);
+        throw new Error("予約状況の確認に失敗しました");
+    }
+
+    if (conflicts && conflicts.length > 0) {
+        return false; // Overlap found
+    }
+
+    return true;
+};
+
+/**
+ * Finds all available staff for a given time slot.
+ */
+export const findAvailableStaff = async (clinicId: string, startTime: Date, endTime: Date): Promise<string[]> => {
+    // 1. Get all staff for the clinic
+    const { data: clinic, error: clinicError } = await supabase
+        .from('clinics')
+        .select('staff_ids')
+        .eq('id', clinicId)
+        .single();
+
+    if (clinicError || !clinic) throw new Error("クリニック情報の取得に失敗しました");
+
+    const allStaffIds: string[] = clinic.staff_ids || [];
+    if (allStaffIds.length === 0) return [];
+
+    const availableStaff: string[] = [];
+
+    // Check availability for each staff
+    // Optimization: Could be done with complex SQL, but loop is safer for complex logic for now
+    for (const staffId of allStaffIds) {
+        try {
+            const isAvailable = await checkStaffAvailability(clinicId, staffId, startTime, endTime);
+            if (isAvailable) {
+                availableStaff.push(staffId);
+            }
+        } catch (e) {
+            // Ignore error, just treat as unavailable or log
+            console.warn(`Skipping staff ${staffId} due to check error`, e);
+        }
+    }
+
+    return availableStaff;
+};
+
 export const createBooking = async (booking: Omit<Booking, 'id'>) => {
     try {
+        let finalStaffId = booking.staffId;
+
+        // --- Integrity Check ---
+        if (finalStaffId) {
+            // Case A: Nomination (Staff ID provided)
+            const isAvailable = await checkStaffAvailability(booking.clinicId, finalStaffId, booking.startTime, booking.endTime);
+            if (!isAvailable) {
+                throw new Error("指定されたスタッフはその時間帯に予約できません（空きがないか、勤務時間外です）。");
+            }
+        } else {
+            // Case B: Free (No Staff ID) -> Auto Assignment
+            const availableStaffIds = await findAvailableStaff(booking.clinicId, booking.startTime, booking.endTime);
+
+            if (availableStaffIds.length === 0) {
+                throw new Error("申し訳ありません、その時間帯はすべてのスタッフが埋まっています。");
+            }
+
+            // Simple assignment strategy: Pick the first available
+            // Future improvement: Load balancing (pick one with fewest bookings)
+            finalStaffId = availableStaffIds[0];
+        }
+        // -----------------------
+
         const dbData = {
             clinic_id: booking.clinicId,
             user_id: booking.userId || null,
-            staff_id: booking.staffId || null,
+            staff_id: finalStaffId, // Use the verified/assigned ID
             booked_by: booking.bookedBy,
             status: booking.status || 'confirmed',
-            start_time: booking.startTime,
-            end_time: booking.endTime,
+            start_time: booking.startTime.toISOString(),
+            end_time: booking.endTime.toISOString(),
             notes: booking.notes,
             guest_name: booking.guestName,
             guest_contact: booking.guestContact,
@@ -435,4 +587,266 @@ export const saveSiteSettings = async (key: string, value: any) => {
         console.error("Error saving site settings:", error);
         throw error;
     }
+};
+
+// --- Shift Requests ---
+
+export interface ShiftRequest {
+    id: string;
+    clinicId: string;
+    staffId: string;
+    date: string;
+    startTime: string;
+    endTime: string;
+    isHoliday: boolean;
+    status: 'pending' | 'approved' | 'rejected';
+}
+
+export const createShiftRequest = async (request: Omit<ShiftRequest, 'id' | 'status'>) => {
+    const dbData = {
+        clinic_id: request.clinicId,
+        staff_id: request.staffId,
+        date: request.date,
+        start_time: request.startTime,
+        end_time: request.endTime,
+        is_holiday: request.isHoliday,
+        status: 'pending'
+    };
+
+    const { error } = await supabase.from('shift_requests').insert(dbData);
+    if (error) throw error;
+};
+
+export const getShiftRequests = async (clinicId: string): Promise<ShiftRequest[]> => {
+    const { data, error } = await supabase
+        .from('shift_requests')
+        .select('*')
+        .eq('clinic_id', clinicId)
+        .eq('status', 'pending')
+        .order('date', { ascending: true });
+
+    if (error) throw error;
+
+    return data.map((r: any) => ({
+        id: r.id,
+        clinicId: r.clinic_id,
+        staffId: r.staff_id,
+        date: r.date,
+        startTime: r.start_time,
+        endTime: r.end_time,
+        isHoliday: r.is_holiday,
+        status: r.status
+    }));
+};
+
+export const approveShiftRequest = async (request: ShiftRequest) => {
+    // 1. Check if shift exists
+    const { data: existingShift } = await supabase
+        .from('shifts')
+        .select('id')
+        .eq('clinic_id', request.clinicId)
+        .eq('staff_id', request.staffId)
+        .eq('date', request.date)
+        .single();
+
+    const shiftData = {
+        clinic_id: request.clinicId,
+        staff_id: request.staffId,
+        date: request.date,
+        start_time: request.startTime,
+        end_time: request.endTime,
+        is_holiday: request.isHoliday
+    };
+
+    if (existingShift) {
+        // Update
+        const { error: updateError } = await supabase
+            .from('shifts')
+            .update(shiftData)
+            .eq('id', existingShift.id);
+
+        if (updateError) throw updateError;
+    } else {
+        // Insert
+        const { error: insertError } = await supabase
+            .from('shifts')
+            .insert(shiftData);
+
+        if (insertError) throw insertError;
+    }
+
+    // 2. Update Request Status
+    const { error: reqError } = await supabase
+        .from('shift_requests')
+        .update({ status: 'approved' })
+        .eq('id', request.id);
+
+    if (reqError) throw reqError;
+};
+
+export const rejectShiftRequest = async (requestId: string) => {
+    const { error } = await supabase
+        .from('shift_requests')
+        .update({ status: 'rejected' })
+        .eq('id', requestId);
+
+    if (error) throw error;
+};
+
+export const deleteMonthlyShifts = async (clinicId: string, startDate: string, endDate: string) => {
+    // Delete requests in range
+    await supabase.from('shift_requests')
+        .delete()
+        .eq('clinic_id', clinicId)
+        .gte('date', startDate)
+        .lte('date', endDate);
+
+    // Delete shifts in range
+    await supabase.from('shifts')
+        .delete()
+        .eq('clinic_id', clinicId)
+        .gte('date', startDate)
+        .lte('date', endDate);
+};
+
+export const getShifts = async (clinicId: string, startDate: string, endDate: string): Promise<Shift[]> => {
+    const { data, error } = await supabase
+        .from('shifts')
+        .select('*')
+        .eq('clinic_id', clinicId)
+        .gte('date', startDate)
+        .lte('date', endDate);
+
+    if (error) throw error;
+
+    return data.map((s: any) => ({
+        id: s.id,
+        clinicId: s.clinic_id,
+        staffId: s.staff_id,
+        date: s.date,
+        startTime: s.start_time?.slice(0, 5),
+        endTime: s.end_time?.slice(0, 5),
+        isHoliday: s.is_holiday
+    }));
+};
+
+// --- Attendance Management ---
+
+export const getTodayAttendance = async (clinicId: string, staffId: string, date: string): Promise<AttendanceRecord | null> => {
+    const { data, error } = await supabase
+        .from('attendance_records')
+        .select('*')
+        .eq('clinic_id', clinicId)
+        .eq('staff_id', staffId)
+        .eq('date', date)
+        .single();
+
+    if (error) {
+        if (error.code === 'PGRST116') return null;
+        throw error;
+    }
+
+    return {
+        id: data.id,
+        clinicId: data.clinic_id,
+        staffId: data.staff_id,
+        date: data.date,
+        clockIn: data.clock_in?.slice(0, 5) || '',
+        clockOut: data.clock_out?.slice(0, 5) || '',
+        breakTime: data.break_time,
+        status: data.status
+    };
+};
+
+export const clockIn = async (clinicId: string, staffId: string) => {
+    const now = new Date();
+    const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+    const { error } = await supabase
+        .from('attendance_records')
+        .insert({
+            clinic_id: clinicId,
+            staff_id: staffId,
+            date: date,
+            clock_in: time,
+            status: 'working',
+            break_time: 0
+        });
+
+    if (error) throw error;
+};
+
+export const clockOut = async (recordId: string, breakTime: number = 60) => {
+    const now = new Date();
+    const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+    const { error } = await supabase
+        .from('attendance_records')
+        .update({
+            clock_out: time,
+            break_time: breakTime,
+            status: 'completed'
+        })
+        .eq('id', recordId);
+
+    if (error) throw error;
+};
+
+export const getAttendanceRecords = async (clinicId: string, date: Date): Promise<AttendanceRecord[]> => {
+    // Basic implementation: fetch by month or specific day?
+    // Admin page usually shows "Month" but filtered by day, or list for a month.
+    // Let's assume the UI passes a Date and we fetch that whole Month's records?
+    // User requested "Staff TimeCard" (today) & Admin Page (List).
+    // Admin page currently has a "Current Date" button, implies Day or Month view.
+    // Let's implement generic fetch by Range for flexibility.
+
+    // For now, let's just fetch the whole MONTH of the given date
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+    const lastDay = new Date(year, month, 0).getDate();
+    const endDate = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+
+    const { data, error } = await supabase
+        .from('attendance_records')
+        .select('*')
+        .eq('clinic_id', clinicId)
+        .gte('date', startDate)
+        .lte('date', endDate)
+        .order('date', { ascending: false });
+
+    if (error) throw error;
+
+    return data.map((r: any) => ({
+        id: r.id,
+        clinicId: r.clinic_id,
+        staffId: r.staff_id,
+        date: r.date,
+        clockIn: r.clock_in?.slice(0, 5) || '',
+        clockOut: r.clock_out?.slice(0, 5) || '',
+        breakTime: r.break_time,
+        status: r.status
+    }));
+};
+
+export const updateAttendanceRecord = async (id: string, updates: Partial<AttendanceRecord>) => {
+    // Convert to snake_case for DB
+    const dbData: any = {};
+    if (updates.clockIn !== undefined) dbData.clock_in = updates.clockIn; // allows empty string to clear?
+    if (updates.clockOut !== undefined) dbData.clock_out = updates.clockOut;
+    if (updates.breakTime !== undefined) dbData.break_time = updates.breakTime;
+
+    // Auto status update?
+    // If clockOut is set and not empty, status -> completed. If empty, working?
+    // Handled by UI mostly, but good to be safe.
+    if (updates.clockOut) dbData.status = 'completed';
+    else if (updates.clockIn && !updates.clockOut) dbData.status = 'working';
+
+    const { error } = await supabase
+        .from('attendance_records')
+        .update(dbData)
+        .eq('id', id);
+
+    if (error) throw error;
 };
