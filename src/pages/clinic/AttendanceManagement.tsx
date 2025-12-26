@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { Clock, Calendar, CheckCircle, AlertCircle, Save, Share2, Copy } from 'lucide-react';
+import { Clock, Calendar, CheckCircle, AlertCircle, Share2, Copy } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import PageLayout from '../../components/PageLayout';
 import { useAuth } from '../../context/AuthContext';
@@ -19,11 +18,50 @@ const AttendanceManagement = () => {
 
     const [showShareModal, setShowShareModal] = useState(false);
     const [viewMode, setViewMode] = useState<'daily' | 'monthly'>('daily');
+    const [shifts, setShifts] = useState<Shift[]>([]);
 
     const calculateMonthlySummary = () => {
         const summary = staffList.map(staff => {
             const staffRecords = records.filter(r => r.staffId === staff.id);
+            const staffShifts = shifts.filter(s => s.staffId === staff.id);
+
+            // 1. Work Days (Actual Attendance)
             const workDays = staffRecords.length;
+
+            // 2. Scheduled Work Days (Shifts that are NOT holidays)
+            const scheduledWorkDays = staffShifts.filter(s => !s.isHoliday).length;
+
+            // 3. Absences
+            // Simple logic: Scheduled but no attendance record for that date
+            let absences = 0;
+            staffShifts.forEach(shift => {
+                if (!shift.isHoliday) {
+                    const specificDate = shift.date; // YYYY-MM-DD
+                    const worked = staffRecords.some(r => {
+                        const rDate = new Date(r.date);
+                        const y = rDate.getFullYear();
+                        const m = String(rDate.getMonth() + 1).padStart(2, '0');
+                        const d = String(rDate.getDate()).padStart(2, '0');
+                        return `${y}-${m}-${d}` === specificDate;
+                    });
+
+                    if (!worked) {
+                        // Only count if date < today (in the past)
+                        const shiftDateObj = new Date(shift.date);
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        if (shiftDateObj < today) {
+                            absences++;
+                        }
+                    }
+                }
+            });
+
+            // 4. Holidays = DaysInMonth - ScheduledWorkDays
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth() + 1;
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const holidays = daysInMonth - scheduledWorkDays;
 
             let totalWorkMinutes = 0;
             let totalBreakMinutes = 0;
@@ -36,9 +74,8 @@ const AttendanceManagement = () => {
                     const start = inHours * 60 + inMinutes;
                     const end = outHours * 60 + outMinutes;
 
-                    // Handle overnight shifts? Assuming same day for now or simple diff
                     let duration = end - start;
-                    if (duration < 0) duration += 24 * 60; // Handle midnight crossing
+                    if (duration < 0) duration += 24 * 60;
 
                     const breakTime = record.breakTime || 0;
                     totalWorkMinutes += (duration - breakTime);
@@ -50,6 +87,8 @@ const AttendanceManagement = () => {
                 staffId: staff.id,
                 name: staff.name,
                 workDays,
+                absences,
+                holidays,
                 totalWorkMinutes,
                 totalBreakMinutes
             };
@@ -118,7 +157,7 @@ const AttendanceManagement = () => {
                 clockOut: editingRecord.clockOut,
                 breakTime: editingRecord.breakTime
             });
-            await fetchRecords();
+            await fetchData();
             setEditingRecord(null);
             alert('保存しました');
         } catch (e: any) {
