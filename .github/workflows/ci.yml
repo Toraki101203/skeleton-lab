@@ -1,0 +1,45 @@
+# CI ワークフロー
+# push / pull_request のたびに 型チェック・lint・ビルド を実行する。
+# 注意:
+#   - package.json に typecheck / test スクリプトは存在しないため、
+#     型チェックは npx tsc で直接実行する（test ステップは無し）。
+#   - ルートの tsconfig.json は solution-style（"files": [] + references のみ）なので、
+#     素の `tsc --noEmit` では何もチェックされない。`-p tsconfig.app.json` を明示する。
+#   - build スクリプト（tsc -b && vite build）も型チェックを含むが、
+#     エラー箇所を早く・分かりやすく出すため typecheck を独立ステップにしている。
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: チェックアウト
+        uses: actions/checkout@v4
+
+      - name: Node.js 22 セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 依存関係インストール
+        run: npm ci
+
+      - name: 型チェック
+        run: npx tsc -p tsconfig.app.json --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      - name: ビルド
+        run: npm run build
+        env:
+          # ビルド時に VITE_ 環境変数が無くても src/lib/supabase.ts の
+          # フォールバック（mock URL）で落ちない設計だが、
+          # 本番相当のビルド検証をしたい場合はリポジトリの Secrets に設定する。
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}

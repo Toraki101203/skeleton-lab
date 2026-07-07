@@ -28,3 +28,7 @@ dist-ssr
 .env.local
 .env.*
 !.env.example
+
+# Claude Code ローカル設定・ループマーカー
+.claude/settings.local.json
+.claude/loop-active
