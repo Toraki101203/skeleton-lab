@@ -1,14 +1,9 @@
 
-import { createBooking, updateBooking, getClinicBookings } from './src/services/db';
+import { updateBooking } from './src/services/db';
 import { supabase } from './src/lib/supabase';
 
 async function testUpdate() {
     console.log("Starting test...");
-
-    // 1. Create a dummy booking
-    const bookingId = crypto.randomUUID();
-    const clinicId = 'clinic1'; // check if exists? assume mock
-    // we need real clinic ID probably.
 
     // Let's use raw SQL to insert to be sure, or better yet, verify existing data.
     // Instead of creating, let's just pick one and update it.

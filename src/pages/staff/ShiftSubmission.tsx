@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Calendar as CalendarIcon, Clock, Check, AlertCircle, Save } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { createShiftRequest } from '../../services/db';
-import type { Staff } from '../../types';
+import type { Clinic, Staff } from '../../types';
 
 const StaffShiftSubmission = () => {
     const { clinicId } = useParams<{ clinicId: string }>();
@@ -14,7 +14,7 @@ const StaffShiftSubmission = () => {
     const [submitted, setSubmitted] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const [clinicHours, setClinicHours] = useState<any>(null);
+    const [clinicHours, setClinicHours] = useState<Clinic['businessHours'] | null>(null);
 
     useEffect(() => {
         if (!clinicId) return;
@@ -50,7 +50,7 @@ const StaffShiftSubmission = () => {
         };
     };
 
-    const handleDateChange = (day: number, field: 'start' | 'end' | 'isHoliday', value: any) => {
+    const handleDateChange = (day: number, field: 'start' | 'end' | 'isHoliday', value: string | boolean) => {
         const dateKey = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         const date = new Date(month.getFullYear(), month.getMonth(), day);
         const { start, end, isClosed } = getClinicDayConfig(date);
@@ -114,9 +114,9 @@ const StaffShiftSubmission = () => {
 
             await Promise.all(requests.map(req => createShiftRequest(req)));
             setSubmitted(true);
-        } catch (err: any) {
+        } catch (err) {
             console.error(err);
-            setError('提出に失敗しました: ' + err.message);
+            setError('提出に失敗しました: ' + (err as { message?: string }).message);
         }
     };
 

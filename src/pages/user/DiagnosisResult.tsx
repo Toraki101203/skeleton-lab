@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { CheckCircle, Search, Phone, ArrowRight, MapPin } from 'lucide-react';
-import type { Clinic } from '../../types';
+import type { Clinic, DiagnosisData } from '../../types';
 import { BODY_PARTS, DURATIONS } from '../../constants/diagnosis';
 
 // Mock Recommendations (would be fetched based on criteria in a real app)
@@ -12,7 +12,7 @@ const MOCK_RECOMMENDATIONS: Clinic[] = [
         name: 'スケルトン整骨院 東京本院',
         description: 'デスクワークによる肩こり・腰痛の専門治療。最新機器と手技を組み合わせた施術が評判です。',
         images: ['https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=600'],
-        businessHours: {} as any, // Simplified for mock
+        businessHours: {} as Clinic['businessHours'], // Simplified for mock
         location: { lat: 35.6895, lng: 139.6917, address: '東京都新宿区西新宿' },
         staffIds: ['s1']
     },
@@ -22,7 +22,7 @@ const MOCK_RECOMMENDATIONS: Clinic[] = [
         name: 'オアシス鍼灸院',
         description: '自律神経の乱れや慢性の痛みに。落ち着いた個室での施術を提供しています。',
         images: ['https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=600'],
-        businessHours: {} as any,
+        businessHours: {} as Clinic['businessHours'],
         location: { lat: 35.6895, lng: 139.6917, address: '東京都渋谷区神宮前' },
         staffIds: ['s2']
     }
@@ -31,13 +31,15 @@ const MOCK_RECOMMENDATIONS: Clinic[] = [
 const DiagnosisResult = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const [diagnosisData, setDiagnosisData] = useState<any>(null);
+    const [diagnosisData, setDiagnosisData] = useState<DiagnosisData | null>(null);
     const [isLocating, setIsLocating] = useState(false);
 
     useEffect(() => {
         console.log('DiagnosisResult: location.state', location.state);
         if (location.state) {
-            setDiagnosisData(location.state);
+            // 画面遷移時に渡された state を反映するための意図的な同期（挙動維持のため許容）
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setDiagnosisData(location.state as DiagnosisData);
         }
     }, [location]);
 

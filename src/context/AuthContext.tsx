@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import type { AuthError } from '@supabase/supabase-js';
 import type { UserProfile, UserRole } from '../types';
 import { supabase } from '../lib/supabase';
 
@@ -6,8 +7,8 @@ interface AuthContextType {
     user: UserProfile | null;
     loading: boolean;
     loginAs: (role: UserRole) => Promise<void>; // Dev helper
-    login: (email: string, password: string) => Promise<{ error: any }>;
-    register: (email: string, password: string, name: string, role?: UserRole) => Promise<{ error: any }>;
+    login: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+    register: (email: string, password: string, name: string, role?: UserRole) => Promise<{ error: AuthError | null }>;
     logout: () => Promise<void>;
 }
 
@@ -83,7 +84,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return () => subscription.unsubscribe();
     }, []);
 
-    const login = async (email: string, password: string): Promise<{ error: any }> => {
+    const login = async (email: string, password: string): Promise<{ error: AuthError | null }> => {
         console.log('AuthContext: login called');
         setLoading(true);
         const { error } = await supabase.auth.signInWithPassword({
@@ -95,7 +96,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return { error };
     };
 
-    const register = async (email: string, password: string, name: string, role: UserRole = 'user'): Promise<{ error: any }> => {
+    const register = async (email: string, password: string, name: string, role: UserRole = 'user'): Promise<{ error: AuthError | null }> => {
         setLoading(true);
         const { data, error } = await supabase.auth.signUp({
             email,
@@ -143,6 +144,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     );
 };
 
+// Context と hook を同一ファイルで提供するための意図的な例外（分割は既存 import 全体に影響するため）
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (context === undefined) {

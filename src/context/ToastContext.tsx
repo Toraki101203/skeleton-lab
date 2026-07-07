@@ -53,6 +53,8 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     );
 };
 
+// Context と hook を同一ファイルで提供するための意図的な例外（分割は既存 import 全体に影響するため）
+// eslint-disable-next-line react-refresh/only-export-components
 export const useToast = () => {
     const context = useContext(ToastContext);
     if (context === undefined) {

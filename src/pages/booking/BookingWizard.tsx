@@ -3,7 +3,8 @@ import { ChevronLeft, ChevronRight, Check, Clock, User } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isToday, getDay, isBefore, startOfDay } from 'date-fns';
 import { ja } from 'date-fns/locale';
-import type { Clinic, Booking } from '../../types';
+import type { RealtimeChannel } from '@supabase/supabase-js';
+import type { Clinic, Booking, BookingRow } from '../../types';
 import { getClinic, createBooking, getClinicBookings } from '../../services/db';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -56,7 +57,7 @@ const BookingWizard = () => {
         let isMounted = true;
         const start = startOfMonth(currentMonth);
         const end = endOfMonth(currentMonth);
-        let subscription: any = null;
+        let subscription: RealtimeChannel | null = null;
 
         const fetchAndSubscribe = async () => {
             // 1. Initial Fetch
@@ -85,7 +86,7 @@ const BookingWizard = () => {
                         const { eventType, new: newRecord, old: oldRecord } = payload;
 
                         if (eventType === 'INSERT') {
-                            const newB = newRecord as any;
+                            const newB = newRecord as BookingRow;
                             const bTime = new Date(newB.start_time);
                             // Add only if in current view (with some buffer ideally, but strictly within month is fine for now)
                             // Actually, since we use start/end of month for initial fetch, we should keep it consistent.
@@ -108,7 +109,7 @@ const BookingWizard = () => {
                                 setBookings(prev => [...prev, newBooking]);
                             }
                         } else if (eventType === 'UPDATE') {
-                            const newB = newRecord as any;
+                            const newB = newRecord as BookingRow;
                             setBookings(prev => prev.map(b => {
                                 if (b.id === newB.id) {
                                     return {
@@ -128,7 +129,7 @@ const BookingWizard = () => {
                                 return b;
                             }));
                         } else if (eventType === 'DELETE') {
-                            setBookings(prev => prev.filter(b => b.id !== (oldRecord as any).id));
+                            setBookings(prev => prev.filter(b => b.id !== (oldRecord as Partial<BookingRow>).id));
                         }
                     }
                 )
@@ -165,7 +166,7 @@ const BookingWizard = () => {
         setStep(prev => Math.max(prev - 1, 1));
     };
 
-    const updateData = (key: string, value: any) => {
+    const updateData = (key: string, value: string | null) => {
         setBookingData(prev => ({ ...prev, [key]: value }));
     };
 

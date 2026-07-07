@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, Phone, Calendar, User, Save, Clock, Mail, Shield, Plus, UserPlus, Building } from 'lucide-react';
 import ScheduleViewer from '../../components/admin/ScheduleViewer';
-import type { UserProfile } from '../../types';
+import type { Clinic, ProfileRow, UserProfile, UserRole } from '../../types';
 import { PREFECTURES, getCities } from '../../data/locations';
 import { supabase } from '../../lib/supabase';
 import { getAllClinics } from '../../services/db';
@@ -26,7 +26,7 @@ const UserManagement = () => {
     const [selectedClinic, setSelectedClinic] = useState('');
     const [bookingDate, setBookingDate] = useState(new Date());
     const [selectedSlot, setSelectedSlot] = useState<{ start: Date, end: Date } | null>(null);
-    const [clinics, setClinics] = useState<any[]>([]);
+    const [clinics, setClinics] = useState<Clinic[]>([]);
 
     // Fetch Users
     useEffect(() => {
@@ -40,7 +40,7 @@ const UserManagement = () => {
                 console.error('Error fetching users:', error);
             } else {
                 // Map Supabase 'id' to 'uid' for UserProfile type compatibility
-                const mappedUsers = (data || []).map((u: any) => ({
+                const mappedUsers = (data || []).map((u: ProfileRow) => ({
                     ...u,
                     uid: u.id
                 }));
@@ -138,7 +138,7 @@ const UserManagement = () => {
 
         alert('注意: 管理画面からの完全なユーザー作成にはバックエンド機能が必要です。\n現在はデモとして表示のみ更新します。');
 
-        const createdUser: any = {
+        const createdUser: UserProfile & { id: string; created_at: string } = {
             id: `temp_${Date.now()}`,
             uid: `temp_${Date.now()}`,
             role: 'user',
@@ -357,7 +357,7 @@ const UserManagement = () => {
                                             <select
                                                 value={selectedUser.role}
                                                 onChange={(e) => {
-                                                    const newRole = e.target.value as any;
+                                                    const newRole = e.target.value as UserRole;
                                                     setSelectedUser({ ...selectedUser, role: newRole });
                                                     alert(`権限を ${newRole} に変更しました`);
                                                 }}

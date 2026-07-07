@@ -1,9 +1,25 @@
 import { supabase } from '../lib/supabase';
-import type { Clinic, Booking, AuditLog, AttendanceRecord, Shift } from '../types';
+import type {
+    Clinic,
+    Booking,
+    AuditLog,
+    AttendanceRecord,
+    Shift,
+    AdminBooking,
+    AnalyticsData,
+    AuditLogDetails,
+    DiagnosisData,
+    ClinicRow,
+    BookingRow,
+    ShiftRow,
+    ShiftRequestRow,
+    AttendanceRecordRow,
+    AuditLogRow,
+} from '../types';
 
 // --- User & Diagnosis ---
 
-export const saveDiagnosis = async (userId: string, data: any) => {
+export const saveDiagnosis = async (userId: string, data: DiagnosisData) => {
     try {
         const { data: result, error } = await supabase
             .from('diagnosis_logs')
@@ -64,7 +80,7 @@ export const getClinic = async (clinicId: string): Promise<Clinic | null> => {
 
 export const updateClinicProfile = async (clinicId: string, data: Partial<Clinic>) => {
     try {
-        const dbData: any = {};
+        const dbData: Partial<ClinicRow> = {};
         if (data.ownerUid) dbData.owner_uid = data.ownerUid;
         if (data.name) dbData.name = data.name;
         if (data.description) dbData.description = data.description;
@@ -117,7 +133,7 @@ export const getAllClinics = async (): Promise<Clinic[]> => {
 
         if (error) throw error;
 
-        return data.map((d: any) => ({
+        return data.map((d: ClinicRow) => ({
             id: d.id,
             ownerUid: d.owner_uid,
             name: d.name,
@@ -313,10 +329,16 @@ export const createBooking = async (booking: Omit<Booking, 'id'>) => {
     }
 };
 
+// updateBooking では start_time / end_time に Date をそのまま渡している（JSON 化時に ISO 文字列になる）
+type BookingUpdatePayload = Partial<Omit<BookingRow, 'start_time' | 'end_time'>> & {
+    start_time?: string | Date;
+    end_time?: string | Date;
+};
+
 export const updateBooking = async (id: string, updates: Partial<Booking>) => {
     try {
         // Map camelCase to snake_case
-        const dbData: any = {};
+        const dbData: BookingUpdatePayload = {};
         if (updates.clinicId) dbData.clinic_id = updates.clinicId;
         if (updates.userId) dbData.user_id = updates.userId;
         if (updates.staffId) dbData.staff_id = updates.staffId;
@@ -354,7 +376,7 @@ export const getClinicBookings = async (clinicId: string, startDate: Date, endDa
 
         if (error) throw error;
 
-        return data.map((b: any) => ({
+        return data.map((b: BookingRow) => ({
             id: b.id,
             clinicId: b.clinic_id,
             userId: b.user_id,
@@ -398,7 +420,7 @@ export const getAdminDashboardStats = async () => {
     }
 };
 
-export const getAnalyticsData = async () => {
+export const getAnalyticsData = async (): Promise<AnalyticsData> => {
     try {
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -447,7 +469,7 @@ export const getAnalyticsData = async () => {
         });
 
         const uniqueClinicIds = Array.from(clinicCounts.keys());
-        let clinicNames = new Map<string, string>();
+        const clinicNames = new Map<string, string>();
         if (uniqueClinicIds.length > 0) {
             const { data: clinics } = await supabase
                 .from('clinics')
@@ -477,7 +499,7 @@ export const getAnalyticsData = async () => {
     }
 };
 
-export const getAllBookings = async (): Promise<any[]> => {
+export const getAllBookings = async (): Promise<AdminBooking[]> => {
     const { data, error } = await supabase
         .from('bookings')
         .select(`
@@ -516,7 +538,7 @@ export const getAuditLogs = async (): Promise<AuditLog[]> => {
 
     if (error) throw error;
 
-    return data.map(log => ({
+    return data.map((log: AuditLogRow) => ({
         id: log.id,
         userId: log.user_id,
         userEmail: log.user_email,
@@ -528,7 +550,7 @@ export const getAuditLogs = async (): Promise<AuditLog[]> => {
     }));
 };
 
-export const logAction = async (action: string, target?: string, details?: any) => {
+export const logAction = async (action: string, target?: string, details?: AuditLogDetails) => {
     const { data: { user } } = await supabase.auth.getUser();
 
     // In a real app, IP would come from edge function or server
@@ -551,7 +573,7 @@ export const logAction = async (action: string, target?: string, details?: any) 
 
 export interface SiteSettings {
     key: string;
-    value: any;
+    value: unknown; // jsonb: 保存する側が任意の形を渡すため
 }
 
 export const getSiteSettings = async (key: string) => {
@@ -576,7 +598,7 @@ export const getSiteSettings = async (key: string) => {
     }
 };
 
-export const saveSiteSettings = async (key: string, value: any) => {
+export const saveSiteSettings = async (key: string, value: unknown) => {
     try {
         const { error } = await supabase
             .from('site_settings')
@@ -627,7 +649,7 @@ export const getShiftRequests = async (clinicId: string): Promise<ShiftRequest[]
 
     if (error) throw error;
 
-    return data.map((r: any) => ({
+    return data.map((r: ShiftRequestRow) => ({
         id: r.id,
         clinicId: r.clinic_id,
         staffId: r.staff_id,
@@ -719,7 +741,7 @@ export const getShifts = async (clinicId: string, startDate: string, endDate: st
 
     if (error) throw error;
 
-    return data.map((s: any) => ({
+    return data.map((s: ShiftRow) => ({
         id: s.id,
         clinicId: s.clinic_id,
         staffId: s.staff_id,
@@ -818,7 +840,7 @@ export const getAttendanceRecords = async (clinicId: string, date: Date): Promis
 
     if (error) throw error;
 
-    return data.map((r: any) => ({
+    return data.map((r: AttendanceRecordRow) => ({
         id: r.id,
         clinicId: r.clinic_id,
         staffId: r.staff_id,
@@ -832,7 +854,7 @@ export const getAttendanceRecords = async (clinicId: string, date: Date): Promis
 
 export const updateAttendanceRecord = async (id: string, updates: Partial<AttendanceRecord>) => {
     // Convert to snake_case for DB
-    const dbData: any = {};
+    const dbData: Partial<AttendanceRecordRow> = {};
     if (updates.clockIn !== undefined) dbData.clock_in = updates.clockIn; // allows empty string to clear?
     if (updates.clockOut !== undefined) dbData.clock_out = updates.clockOut;
     if (updates.breakTime !== undefined) dbData.break_time = updates.breakTime;

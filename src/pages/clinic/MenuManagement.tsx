@@ -89,11 +89,11 @@ const MenuManagement = () => {
 
             setCategories(newCategories);
             setMenuItems(newItems);
-        } catch (err: any) {
+        } catch (err) {
             console.error('Error saving data:', err);
-            alert('保存に失敗しました: ' + err.message);
+            alert('保存に失敗しました: ' + (err as { message?: string }).message);
         } finally {
-
+            // no-op（構造維持のため残置）
         }
     };
 
@@ -134,7 +134,7 @@ const MenuManagement = () => {
             return;
         }
 
-        let newItems = [...menuItems];
+        const newItems = [...menuItems];
         const index = newItems.findIndex(i => i.id === editingItem.id);
 
         if (index >= 0) {
@@ -384,7 +384,7 @@ const MenuManagement = () => {
                                         <label className="block text-sm font-bold text-gray-700 mb-2">税区分</label>
                                         <select
                                             value={editingItem.taxType}
-                                            onChange={(e) => setEditingItem({ ...editingItem!, taxType: e.target.value as any })}
+                                            onChange={(e) => setEditingItem({ ...editingItem!, taxType: e.target.value as MenuItem['taxType'] })}
                                             className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all bg-white text-gray-900"
                                         >
                                             <option value="tax_included">税込</option>

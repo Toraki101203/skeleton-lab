@@ -6,7 +6,7 @@ import PageLayout from '../../components/PageLayout';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { getShiftRequests, approveShiftRequest, rejectShiftRequest, type ShiftRequest } from '../../services/db';
-import type { Staff, Shift } from '../../types';
+import type { Staff, Shift, ShiftRow } from '../../types';
 
 const ShiftManagement = () => {
     const { user } = useAuth();
@@ -76,7 +76,7 @@ const ShiftManagement = () => {
             if (error) throw error;
 
             if (data) {
-                const formattedShifts: Shift[] = data.map((s: any) => ({
+                const formattedShifts: Shift[] = data.map((s: ShiftRow) => ({
                     id: s.id,
                     clinicId: s.clinic_id,
                     staffId: s.staff_id,
@@ -107,8 +107,8 @@ const ShiftManagement = () => {
             await approveShiftRequest(req);
             // Refresh
             await fetchShiftsAndRequests();
-        } catch (e: any) {
-            alert('承認失敗: ' + e.message);
+        } catch (e) {
+            alert('承認失敗: ' + (e as { message?: string }).message);
         }
     };
 
@@ -117,8 +117,8 @@ const ShiftManagement = () => {
         try {
             await rejectShiftRequest(reqId);
             await fetchShiftsAndRequests();
-        } catch (e: any) {
-            alert('却下失敗: ' + e.message);
+        } catch (e) {
+            alert('却下失敗: ' + (e as { message?: string }).message);
         }
     };
 
@@ -248,9 +248,9 @@ const ShiftManagement = () => {
             setSelectedDate(null);
             setEditingShifts([]); // Clear editing state
             alert('保存しました');
-        } catch (err: any) {
+        } catch (err) {
             console.error('Error saving shifts:', err);
-            alert('保存に失敗しました: ' + err.message);
+            alert('保存に失敗しました: ' + (err as { message?: string }).message);
         } finally {
             setLoading(false);
         }
@@ -285,9 +285,9 @@ const ShiftManagement = () => {
             setSelectedRequestIds([]);
             await fetchShiftsAndRequests();
             alert('承認しました');
-        } catch (e: any) {
+        } catch (e) {
             console.error(e);
-            alert('一部の処理に失敗しました: ' + e.message);
+            alert('一部の処理に失敗しました: ' + (e as { message?: string }).message);
             // Refresh to see what actually succeeded
             await fetchShiftsAndRequests();
         } finally {
@@ -314,9 +314,9 @@ const ShiftManagement = () => {
 
             await fetchShiftsAndRequests(); // Refresh
             alert(`${year}年${month}月のデータを削除しました。`);
-        } catch (e: any) {
+        } catch (e) {
             console.error(e);
-            alert('削除に失敗しました: ' + e.message);
+            alert('削除に失敗しました: ' + (e as { message?: string }).message);
         } finally {
             setLoading(false);
         }

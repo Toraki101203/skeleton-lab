@@ -149,7 +149,7 @@ const ClinicDetail = () => {
                                 <label className="block text-sm font-bold text-gray-700 mb-2">現在の状態</label>
                                 <select
                                     value={formData.status || 'pending'}
-                                    onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+                                    onChange={(e) => setFormData({ ...formData, status: e.target.value as Clinic['status'] })}
                                     className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
                                 >
                                     <option value="pending">承認待ち (Pending)</option>

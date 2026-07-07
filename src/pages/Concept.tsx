@@ -1,9 +1,10 @@
 import { ArrowDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getSiteSettings } from '../services/db';
+import type { ImageDisplaySettings } from '../types';
 
 const PlatformIllustration = () => {
-    const [settings, setSettings] = useState<any>(null);
+    const [settings, setSettings] = useState<ImageDisplaySettings | null>(null);
 
     useEffect(() => {
         getSiteSettings('concept_platform_image_settings').then(data => {
@@ -38,7 +39,7 @@ const PlatformIllustration = () => {
 };
 
 const WorryItem = ({ settingId, title }: { settingId: string, title: React.ReactNode }) => {
-    const [settings, setSettings] = useState<any>(null);
+    const [settings, setSettings] = useState<ImageDisplaySettings | null>(null);
 
     useEffect(() => {
         getSiteSettings(settingId).then(data => {
@@ -76,7 +77,7 @@ const WorryItem = ({ settingId, title }: { settingId: string, title: React.React
 };
 
 const SolutionIcon = () => {
-    const [settings, setSettings] = useState<any>(null);
+    const [settings, setSettings] = useState<ImageDisplaySettings | null>(null);
 
     useEffect(() => {
         getSiteSettings('concept_solution_icon_settings').then(data => {
@@ -116,7 +117,7 @@ const SolutionIcon = () => {
 };
 
 const SolutionDecor = () => {
-    const [settings, setSettings] = useState<any>(null);
+    const [settings, setSettings] = useState<ImageDisplaySettings | null>(null);
 
     useEffect(() => {
         getSiteSettings('concept_solution_decor_settings').then(data => {
@@ -153,7 +154,7 @@ const SolutionDecor = () => {
 };
 
 const MonitorImage = () => {
-    const [settings, setSettings] = useState<any>(null);
+    const [settings, setSettings] = useState<ImageDisplaySettings | null>(null);
 
     useEffect(() => {
         getSiteSettings('concept_monitor_image_settings').then(data => {

@@ -151,6 +151,8 @@ export const useClinicSearch = (initialState?: { location?: { lat: number; lng: 
             // I will return calculateDistance helper from hook so UI can use it.
 
             result = withinRadius.map(c => {
+                // distance プロパティを除外するための rest 分割（distance 自体は未使用）
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const { distance, ...rest } = c;
                 return rest;
             });

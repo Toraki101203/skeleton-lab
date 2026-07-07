@@ -33,9 +33,9 @@ const ClinicManagement = () => {
         try {
             await updateClinicProfile(clinicId, { status: newStatus });
             setClinics(clinics.map(c => c.id === clinicId ? { ...c, status: newStatus } : c));
-        } catch (error: any) {
+        } catch (error) {
             console.error('Error updating status:', error);
-            alert(`ステータスの更新に失敗しました: ${error.message || JSON.stringify(error)}`);
+            alert(`ステータスの更新に失敗しました: ${(error as { message?: string }).message || JSON.stringify(error)}`);
         }
     };
 
@@ -45,9 +45,9 @@ const ClinicManagement = () => {
         try {
             await deleteClinic(clinicId);
             setClinics(clinics.filter(c => c.id !== clinicId));
-        } catch (error: any) {
+        } catch (error) {
             console.error('Error deleting clinic:', error);
-            alert(`クリニックの削除に失敗しました: ${error.message || JSON.stringify(error)}`);
+            alert(`クリニックの削除に失敗しました: ${(error as { message?: string }).message || JSON.stringify(error)}`);
         }
     };
 
@@ -120,7 +120,7 @@ const ClinicManagement = () => {
                     <div className="flex gap-2">
                         <select
                             value={filterStatus}
-                            onChange={(e) => setFilterStatus(e.target.value as any)}
+                            onChange={(e) => setFilterStatus(e.target.value as 'all' | 'active' | 'pending' | 'suspended')}
                             className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 text-gray-600 font-medium"
                         >
                             <option value="all">すべてのステータス</option>

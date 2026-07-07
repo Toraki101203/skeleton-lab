@@ -3,14 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronRight, ChevronLeft, Activity } from 'lucide-react';
 import { saveDiagnosis } from '../../services/db';
 import { useAuth } from '../../context/AuthContext';
+import type { DiagnosisData } from '../../types';
 
 type Step = 1 | 2 | 3;
-
-interface DiagnosisData {
-    bodyPart: string;
-    symptoms: string[];
-    duration: string;
-}
 
 import { BODY_PARTS, SYMPTOMS, DURATIONS } from '../../constants/diagnosis';
 
@@ -28,6 +23,8 @@ const DiagnosisWizard = () => {
     useEffect(() => {
         const saved = localStorage.getItem('diagnosis_draft');
         if (saved) {
+            // マウント時に localStorage の下書きを復元するための意図的な同期（挙動維持のため許容）
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setData(JSON.parse(saved));
         }
     }, []);

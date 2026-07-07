@@ -34,7 +34,7 @@ const DAYS_MAP = {
 const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 
 const BusinessHoursEditor: React.FC<Props> = ({ value, onChange }) => {
-    const handleChange = (day: string, field: keyof BusinessHours, val: any) => {
+    const handleChange = (day: string, field: keyof BusinessHours, val: string | boolean) => {
         onChange({
             ...value,
             [day]: {

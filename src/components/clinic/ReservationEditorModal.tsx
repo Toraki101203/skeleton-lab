@@ -121,7 +121,7 @@ const ReservationEditorModal = ({ isOpen, onClose, initialReservation, staffList
                 date: formData.date!,
                 startTime: formData.startTime!,
                 endTime: formData.endTime || calculateEndTime(formData.startTime!, formData.menuItemId),
-                status: formData.status as any,
+                status: formData.status as Reservation['status'],
                 notes: formData.notes,
                 createdAt: formData.createdAt || new Date().toISOString()
             };
@@ -143,7 +143,7 @@ const ReservationEditorModal = ({ isOpen, onClose, initialReservation, staffList
                 userId: undefined, // guest booking
                 staffId: reservation.staffId,
                 bookedBy: 'proxy', // Valid value
-                status: reservation.status as any, // Cast to any to avoid strict mismatch if types are slightly different
+                status: reservation.status as Booking['status'], // Reservation 側にのみ 'completed' があるため型を合わせる
                 startTime: startDate,
                 endTime: endDate,
                 notes: reservation.notes,
@@ -169,9 +169,9 @@ const ReservationEditorModal = ({ isOpen, onClose, initialReservation, staffList
 
             onSave(reservation);
             onClose();
-        } catch (err: any) {
+        } catch (err) {
             console.error(err);
-            alert('保存に失敗しました: ' + (err.message || String(err)));
+            alert('保存に失敗しました: ' + ((err as { message?: string }).message || String(err)));
         } finally {
             setIsSubmitting(false);
         }
@@ -276,7 +276,7 @@ const ReservationEditorModal = ({ isOpen, onClose, initialReservation, staffList
                                         ].map((statusOption) => (
                                             <button
                                                 key={statusOption.value}
-                                                onClick={() => setFormData({ ...formData, status: statusOption.value as any })}
+                                                onClick={() => setFormData({ ...formData, status: statusOption.value as Reservation['status'] })}
                                                 className={`px-4 py-2 rounded-lg text-sm font-bold border-2 transition-all ${formData.status === statusOption.value
                                                     ? `${statusOption.color} ring-2 ring-offset-1 ring-primary/20`
                                                     : 'bg-white border-gray-100 text-gray-500 hover:bg-gray-50'

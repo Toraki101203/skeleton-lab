@@ -103,7 +103,7 @@ const ReservationManagement = () => {
                             date: dateStr,
                             startTime: `${startH}:${startM}`,
                             endTime: `${endH}:${endM}`,
-                            status: b.status as any,
+                            status: b.status,
                             notes: b.notes,
                             createdAt: new Date().toISOString() // Not in type but ok
                         };

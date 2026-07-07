@@ -160,8 +160,8 @@ const AttendanceManagement = () => {
             await fetchData();
             setEditingRecord(null);
             alert('保存しました');
-        } catch (e: any) {
-            alert('保存に失敗しました: ' + e.message);
+        } catch (e) {
+            alert('保存に失敗しました: ' + (e as { message?: string }).message);
         }
     };
 

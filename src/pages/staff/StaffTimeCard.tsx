@@ -65,8 +65,8 @@ const StaffTimeCard = () => {
             const dateKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
             const data = await getTodayAttendance(clinicId, selectedStaffId, dateKey);
             setRecord(data);
-        } catch (e: any) {
-            alert('打刻に失敗しました: ' + e.message);
+        } catch (e) {
+            alert('打刻に失敗しました: ' + (e as { message?: string }).message);
         } finally {
             setLoading(false);
         }
@@ -84,8 +84,8 @@ const StaffTimeCard = () => {
             const dateKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
             const data = await getTodayAttendance(clinicId!, selectedStaffId!, dateKey);
             setRecord(data);
-        } catch (e: any) {
-            alert('打刻に失敗しました: ' + e.message);
+        } catch (e) {
+            alert('打刻に失敗しました: ' + (e as { message?: string }).message);
         } finally {
             setLoading(false);
         }

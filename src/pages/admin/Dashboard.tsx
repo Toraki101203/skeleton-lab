@@ -5,6 +5,7 @@ import { getAdminDashboardStats, getAnalyticsData } from '../../services/db';
 import {
     LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
+import type { AnalyticsData } from '../../types';
 
 const Dashboard = () => {
     const [stats, setStats] = useState({
@@ -12,10 +13,10 @@ const Dashboard = () => {
         totalClinics: 0,
         pendingClinics: 0,
     });
-    const [analytics, setAnalytics] = useState({
-        dailyBookings: [] as any[],
-        userGrowth: [] as any[],
-        popularClinics: [] as any[]
+    const [analytics, setAnalytics] = useState<AnalyticsData>({
+        dailyBookings: [],
+        userGrowth: [],
+        popularClinics: []
     });
     const [isLoading, setIsLoading] = useState(true);
 

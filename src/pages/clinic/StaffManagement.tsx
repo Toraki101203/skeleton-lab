@@ -3,7 +3,7 @@ import { Plus, Trash2, Edit2, User, Clock, Check } from 'lucide-react';
 import PageLayout from '../../components/PageLayout';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
-import type { Staff, MenuItem, BusinessHours } from '../../types';
+import type { Staff, MenuItem, BusinessHours, RawStaffInfo } from '../../types';
 import StaffEditorModal from '../../components/clinic/StaffEditorModal';
 
 const INITIAL_HOURS: BusinessHours = { start: '09:00', end: '20:00', isClosed: false };
@@ -46,9 +46,9 @@ const StaffManagement = () => {
 
                     // 1. Ensure menu items have IDs (Migration)
                     let loadedMenuItems = data.menu_items || [];
-                    if (loadedMenuItems.some((item: any) => !item.id)) {
+                    if (loadedMenuItems.some((item: Partial<MenuItem>) => !item.id)) {
                         console.log('Migrating menu items: Adding missing IDs');
-                        loadedMenuItems = loadedMenuItems.map((item: any) => ({
+                        loadedMenuItems = loadedMenuItems.map((item: Partial<MenuItem>) => ({
                             ...item,
                             id: item.id || crypto.randomUUID()
                         }));
@@ -62,7 +62,7 @@ const StaffManagement = () => {
                     setMenuItems(loadedMenuItems);
 
                     // 2. Ensure staff has all required fields (Migration)
-                    const loadedStaff = (data.staff_info || []).map((s: any) => ({
+                    const loadedStaff = (data.staff_info || []).map((s: RawStaffInfo) => ({
                         id: s.id || crypto.randomUUID(),
                         name: s.name || '',
                         role: s.role || '',
@@ -99,16 +99,16 @@ const StaffManagement = () => {
             setStaffList(newStaffList);
             setIsModalOpen(false);
             setEditingStaff(null);
-        } catch (err: any) {
+        } catch (err) {
             console.error('Error saving data:', err);
-            alert('保存に失敗しました: ' + err.message);
+            alert('保存に失敗しました: ' + (err as { message?: string }).message);
         } finally {
-
+            // no-op（構造維持のため残置）
         }
     };
 
     const handleSaveStaff = async (staffToSave: Staff) => {
-        let newStaffList = [...staffList];
+        const newStaffList = [...staffList];
         const index = newStaffList.findIndex(s => s.id === staffToSave.id);
 
         if (index >= 0) {

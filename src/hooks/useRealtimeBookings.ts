@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import type { Booking } from '../types';
+import type { Booking, BookingRow } from '../types';
 import { useToast } from '../context/ToastContext';
 
 export const useRealtimeBookings = (clinicId: string, date: Date) => {
@@ -28,7 +28,7 @@ export const useRealtimeBookings = (clinicId: string, date: Date) => {
                 if (error) throw error;
 
                 if (isMounted) {
-                    setBookings((data || []).map((b: any) => ({
+                    setBookings((data || []).map((b: BookingRow): Booking => ({
                         id: b.id,
                         clinicId: b.clinic_id,
                         userId: b.user_id,
@@ -71,7 +71,7 @@ export const useRealtimeBookings = (clinicId: string, date: Date) => {
                     const { eventType, new: newRecord, old: oldRecord } = payload;
 
                     if (eventType === 'INSERT') {
-                        const newB = newRecord as any;
+                        const newB = newRecord as BookingRow;
                         const bookingTime = new Date(newB.start_time);
 
                         // Only add if it belongs to current day view
@@ -97,7 +97,7 @@ export const useRealtimeBookings = (clinicId: string, date: Date) => {
                             showToast(`予約が入りました: ${bookingTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`, 'info');
                         }
                     } else if (eventType === 'UPDATE') {
-                        const newB = newRecord as any;
+                        const newB = newRecord as BookingRow;
                         setBookings(prev => prev.map(b => {
                             if (b.id === newB.id) {
                                 return {
@@ -117,7 +117,7 @@ export const useRealtimeBookings = (clinicId: string, date: Date) => {
                             return b;
                         }));
                     } else if (eventType === 'DELETE') {
-                        setBookings(prev => prev.filter(b => b.id !== (oldRecord as any).id));
+                        setBookings(prev => prev.filter(b => b.id !== (oldRecord as Partial<BookingRow>).id));
                     }
                 }
             )

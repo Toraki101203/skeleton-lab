@@ -6,7 +6,7 @@ import StaffEditorModal from '../../components/clinic/StaffEditorModal';
 import ImageUploader from '../../components/ImageUploader';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
-import type { BusinessHours, Staff, MenuItem } from '../../types';
+import type { BusinessHours, Staff, MenuItem, RawStaffInfo } from '../../types';
 
 const INITIAL_HOURS: BusinessHours = { start: '09:00', end: '20:00', isClosed: false };
 const INITIAL_WEEK = {
@@ -76,7 +76,7 @@ const ProfileEditor = () => {
                     if (data.images) setImages(data.images);
                     if (data.staff_info) {
                         // Migration for old staff data
-                        const loadedStaff = data.staff_info.map((s: any) => ({
+                        const loadedStaff = data.staff_info.map((s: RawStaffInfo) => ({
                             id: s.id || crypto.randomUUID(),
                             name: s.name || '',
                             role: s.role || '',
@@ -161,9 +161,9 @@ const ProfileEditor = () => {
             if (error) throw error;
 
             alert('基本情報を保存しました');
-        } catch (error: any) {
+        } catch (error) {
             console.error("Failed to update profile", error);
-            alert(`保存に失敗しました: ${error.message}`);
+            alert(`保存に失敗しました: ${(error as { message?: string }).message}`);
         } finally {
             setLoading(false);
         }
@@ -180,7 +180,7 @@ const ProfileEditor = () => {
         category: '',
         taxType: 'tax_included'
     }]);
-    const updateMenuItem = (index: number, field: string, value: any) => {
+    const updateMenuItem = (index: number, field: string, value: string | number) => {
         const newItems = [...menuItems];
         newItems[index] = { ...newItems[index], [field]: value };
         setMenuItems(newItems);

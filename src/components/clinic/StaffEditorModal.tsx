@@ -19,6 +19,8 @@ const StaffEditorModal = ({ isOpen, onClose, initialStaff, onSave, menuItems }: 
 
     // Reset state when modal opens with new staff
     useEffect(() => {
+        // モーダルを開いた時に props と同期するための意図的なリセット（挙動維持のため許容）
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setEditingStaff(initialStaff);
         setActiveTab('basic');
     }, [initialStaff, isOpen]);

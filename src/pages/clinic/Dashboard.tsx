@@ -5,6 +5,7 @@ import PageLayout from '../../components/PageLayout';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { getClinicBookings } from '../../services/db';
+import type { Staff } from '../../types';
 
 const ClinicDashboard = () => {
     const { user } = useAuth();
@@ -91,8 +92,8 @@ const ClinicDashboard = () => {
                     // For now let's rely on shifts as per plan, or maybe default schedule is too complex here
                     // If strict "available slots needs shifts", then 0 is correct if no shifts
                     // But maybe we should check default schedule for robustness
-                    const dayKey = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][new Date().getDay()];
-                    clinic.staff_info.forEach((staff: any) => {
+                    const dayKey = (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const)[new Date().getDay()];
+                    clinic.staff_info.forEach((staff: Staff) => {
                         const schedule = staff.defaultSchedule?.[dayKey];
                         if (schedule && !schedule.isClosed) {
                             const start = parseInt(schedule.start.split(':')[0]);

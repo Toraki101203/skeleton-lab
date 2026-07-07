@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { getSiteSettings } from '../services/db';
+import type { ImageDisplaySettings } from '../types';
 
 const FeaturesLeftDecor = () => {
-    const [settings, setSettings] = useState<any>(null);
+    const [settings, setSettings] = useState<ImageDisplaySettings | null>(null);
 
     useEffect(() => {
         getSiteSettings('features_left_decor_settings').then(data => {
@@ -33,7 +34,7 @@ const FeaturesLeftDecor = () => {
 };
 
 const FeaturesRightDecor = () => {
-    const [settings, setSettings] = useState<any>(null);
+    const [settings, setSettings] = useState<ImageDisplaySettings | null>(null);
 
     useEffect(() => {
         getSiteSettings('features_right_decor_settings').then(data => {
@@ -64,7 +65,7 @@ const FeaturesRightDecor = () => {
 };
 
 const FeaturesMainImage = () => {
-    const [settings, setSettings] = useState<any>(null);
+    const [settings, setSettings] = useState<ImageDisplaySettings | null>(null);
 
     useEffect(() => {
         getSiteSettings('features_main_image_settings').then(data => {

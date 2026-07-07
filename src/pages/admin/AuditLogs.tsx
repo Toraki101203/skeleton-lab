@@ -20,7 +20,7 @@ const formatAction = (action: string) => {
 
 const formatTarget = (log: AuditLog) => {
     if (log.action === 'UPDATE_RESERVATION_STATUS' && log.details) {
-        const details = log.details as any;
+        const details = log.details;
         return (
             <div>
                 <div className="font-medium text-gray-800">予約ステータス変更</div>
@@ -32,7 +32,7 @@ const formatTarget = (log: AuditLog) => {
         );
     }
     if (log.action === 'CREATE_RESERVATION' && log.details) {
-        const details = log.details as any;
+        const details = log.details;
         return (
             <div>
                 <div className="font-medium text-gray-800">予約作成: {details.guest || 'ゲスト'}</div>
