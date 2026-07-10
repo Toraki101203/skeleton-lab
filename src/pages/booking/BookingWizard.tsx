@@ -3,11 +3,9 @@ import { ChevronLeft, ChevronRight, Check, Clock, User } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isToday, getDay, isBefore, startOfDay } from 'date-fns';
 import { ja } from 'date-fns/locale';
-import type { RealtimeChannel } from '@supabase/supabase-js';
-import type { Clinic, Booking, BookingRow } from '../../types';
-import { getClinic, createBooking, getClinicBookings } from '../../services/db';
+import type { Clinic, BookingSlot } from '../../types';
+import { getClinic, createBooking, getPublicBookingAvailability } from '../../services/db';
 import { useAuth } from '../../context/AuthContext';
-import { supabase } from '../../lib/supabase';
 
 const BookingWizard = () => {
     const [searchParams] = useSearchParams();
@@ -15,7 +13,7 @@ const BookingWizard = () => {
     const { user } = useAuth();
 
     const [clinic, setClinic] = useState<Clinic | null>(null);
-    const [bookings, setBookings] = useState<Booking[]>([]);
+    const [bookings, setBookings] = useState<BookingSlot[]>([]);
     const [loading, setLoading] = useState(true);
 
     // Calendar State
@@ -50,97 +48,37 @@ const BookingWizard = () => {
         fetchData();
     }, [clinicId]);
 
-    // Fetch bookings when month or clinic changes AND subscribe to real-time updates
+    // 表示中の月の「空き枠」を取り直す（月やクリニックが変わるたび）。
+    //
+    // 以前は bookings テーブルを Realtime で購読して即時反映していたが、
+    // 未ログインのゲストには bookings を読ませない方針に変えた（患者さんの氏名・連絡先・
+    // 症状メモが誰でも読める状態だったため / 2026-07-10 のセキュリティ監査）。
+    // 読めない以上 Realtime のイベントも届かないので、画面を開いた時に取得する方式にした。
+    //
+    // 「表示後に他の人が同じ枠を取った」場合でも、送信時に DB の重複禁止制約
+    // （bookings_no_overlap）が確実に弾くため、ダブルブッキングは起きない。
     useEffect(() => {
         if (!clinicId) return;
 
         let isMounted = true;
         const start = startOfMonth(currentMonth);
         const end = endOfMonth(currentMonth);
-        let subscription: RealtimeChannel | null = null;
 
-        const fetchAndSubscribe = async () => {
-            // 1. Initial Fetch
+        const fetchAvailability = async () => {
             try {
-                const data = await getClinicBookings(clinicId, start, end);
+                const data = await getPublicBookingAvailability(clinicId, start, end);
                 if (isMounted) {
                     setBookings(data);
                 }
             } catch (error) {
                 console.error("Failed to fetch bookings", error);
             }
-
-            // 2. Real-time Subscription
-            subscription = supabase
-                .channel(`booking-wizard-${clinicId}-${currentMonth.toISOString()}`)
-                .on(
-                    'postgres_changes',
-                    {
-                        event: '*',
-                        schema: 'public',
-                        table: 'bookings',
-                        filter: `clinic_id=eq.${clinicId}`
-                    },
-                    (payload) => {
-                        if (!isMounted) return;
-                        const { eventType, new: newRecord, old: oldRecord } = payload;
-
-                        if (eventType === 'INSERT') {
-                            const newB = newRecord as BookingRow;
-                            const bTime = new Date(newB.start_time);
-                            // Add only if in current view (with some buffer ideally, but strictly within month is fine for now)
-                            // Actually, since we use start/end of month for initial fetch, we should keep it consistent.
-                            if (bTime >= start && bTime <= end) {
-                                const newBooking: Booking = {
-                                    id: newB.id,
-                                    clinicId: newB.clinic_id,
-                                    userId: newB.user_id,
-                                    staffId: newB.staff_id,
-                                    bookedBy: newB.booked_by,
-                                    status: newB.status,
-                                    startTime: new Date(newB.start_time),
-                                    endTime: new Date(newB.end_time),
-                                    notes: newB.notes,
-                                    guestName: newB.guest_name,
-                                    guestContact: newB.guest_contact,
-                                    guestEmail: newB.guest_email,
-                                    internalMemo: newB.internal_memo
-                                };
-                                setBookings(prev => [...prev, newBooking]);
-                            }
-                        } else if (eventType === 'UPDATE') {
-                            const newB = newRecord as BookingRow;
-                            setBookings(prev => prev.map(b => {
-                                if (b.id === newB.id) {
-                                    return {
-                                        ...b,
-                                        bookedBy: newB.booked_by,
-                                        status: newB.status,
-                                        startTime: new Date(newB.start_time),
-                                        endTime: new Date(newB.end_time),
-                                        notes: newB.notes,
-                                        staffId: newB.staff_id,
-                                        guestName: newB.guest_name,
-                                        guestContact: newB.guest_contact,
-                                        guestEmail: newB.guest_email,
-                                        internalMemo: newB.internal_memo
-                                    };
-                                }
-                                return b;
-                            }));
-                        } else if (eventType === 'DELETE') {
-                            setBookings(prev => prev.filter(b => b.id !== (oldRecord as Partial<BookingRow>).id));
-                        }
-                    }
-                )
-                .subscribe();
         };
 
-        fetchAndSubscribe();
+        fetchAvailability();
 
         return () => {
             isMounted = false;
-            if (subscription) supabase.removeChannel(subscription);
         };
     }, [clinicId, currentMonth]);
 

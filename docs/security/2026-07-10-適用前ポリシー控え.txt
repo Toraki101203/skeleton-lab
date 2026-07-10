@@ -1,0 +1,41 @@
+# skeleton-lab 本番 RLS ポリシー（Phase 1 適用直前のスナップショット）
+# 取得日時: 2026-07-10 15:02:46 JST
+# 用途: 万一アプリが壊れた場合、この内容に戻すための控え
+
+attendance_records | DELETE | Public delete access | roles=public | using=true | check=-
+attendance_records | INSERT | Public insert access | roles=public | using=- | check=true
+attendance_records | SELECT | Public read access | roles=public | using=true | check=-
+attendance_records | UPDATE | Public update access | roles=public | using=true | check=-
+audit_logs | INSERT | Authenticated users can insert audit logs | roles=public | using=- | check=(auth.role() = 'authenticated'::text)
+audit_logs | INSERT | System can insert audit logs | roles=public | using=- | check=true
+audit_logs | SELECT | Admins can view audit logs | roles=public | using=(((auth.jwt() -\u003e\u003e 'role'::text) = 'service_role'::text) OR (EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['clinic_admin'::text, 'super_admin'::text])))))) | check=-
+bookings | INSERT | Clinic admins can insert any booking. | roles=public | using=- | check=((((auth.jwt() -\u003e 'app_metadata'::text) -\u003e\u003e 'role'::text) = ANY (ARRAY['clinic_admin'::text, 'super_admin'::text])) AND (EXISTS ( SELECT 1\n   FROM clinics\n  WHERE ((clinics.id = bookings.clinic_id) AND (clinics.owner_uid = auth.uid())))))
+bookings | INSERT | Guests can insert bookings | roles=public | using=- | check=(user_id IS NULL)
+bookings | INSERT | Users can insert own bookings. | roles=public | using=- | check=(auth.uid() = user_id)
+bookings | SELECT | Anyone can view bookings | roles=public | using=true | check=-
+bookings | SELECT | Clinic admins can view bookings for their clinic. | roles=public | using=(EXISTS ( SELECT 1\n   FROM clinics\n  WHERE ((clinics.id = bookings.clinic_id) AND (clinics.owner_uid = auth.uid())))) | check=-
+bookings | SELECT | Users can view own bookings. | roles=public | using=(auth.uid() = user_id) | check=-
+bookings | UPDATE | Clinic admins can update bookings for their clinic. | roles=public | using=((((auth.jwt() -\u003e 'app_metadata'::text) -\u003e\u003e 'role'::text) = ANY (ARRAY['clinic_admin'::text, 'super_admin'::text])) AND (EXISTS ( SELECT 1\n   FROM clinics\n  WHERE ((clinics.id = bookings.clinic_id) AND (clinics.owner_uid = auth.uid()))))) | check=-
+clinic_daily_stats | SELECT | Clinic admins can view own stats. | roles=public | using=(EXISTS ( SELECT 1\n   FROM clinics\n  WHERE ((clinics.id = clinic_daily_stats.clinic_id) AND (clinics.owner_uid = auth.uid())))) | check=-
+clinics | DELETE | Enable delete for authenticated users | roles=authenticated | using=true | check=-
+clinics | INSERT | Clinic admins can insert clinics. | roles=public | using=- | check=(auth.uid() = owner_uid)
+clinics | SELECT | Clinics are viewable by everyone. | roles=public | using=true | check=-
+clinics | UPDATE | Clinic admins can update own clinics. | roles=public | using=(auth.uid() = owner_uid) | check=-
+clinics | UPDATE | Enable update for authenticated users | roles=authenticated | using=true | check=true
+diagnosis_logs | INSERT | Users can insert own diagnosis logs. | roles=public | using=- | check=(auth.uid() = user_id)
+diagnosis_logs | SELECT | Users can view own diagnosis logs. | roles=public | using=(auth.uid() = user_id) | check=-
+profiles | INSERT | Users can insert their own profile. | roles=public | using=- | check=(auth.uid() = id)
+profiles | SELECT | Public profiles are viewable by everyone. | roles=public | using=true | check=-
+profiles | UPDATE | Users can update own profile. | roles=public | using=(auth.uid() = id) | check=-
+shift_requests | DELETE | Enable delete for owners | roles=public | using=(EXISTS ( SELECT 1\n   FROM clinics\n  WHERE ((clinics.id = shift_requests.clinic_id) AND (clinics.owner_uid = auth.uid())))) | check=-
+shift_requests | INSERT | Enable insert for everyone | roles=public | using=- | check=true
+shift_requests | SELECT | Enable read for owners | roles=public | using=(EXISTS ( SELECT 1\n   FROM clinics\n  WHERE ((clinics.id = shift_requests.clinic_id) AND (clinics.owner_uid = auth.uid())))) | check=-
+shift_requests | UPDATE | Enable update for owners | roles=public | using=(EXISTS ( SELECT 1\n   FROM clinics\n  WHERE ((clinics.id = shift_requests.clinic_id) AND (clinics.owner_uid = auth.uid())))) | check=-
+shifts | ALL | Clinic admins can manage shifts for their clinic. | roles=public | using=((((auth.jwt() -\u003e 'app_metadata'::text) -\u003e\u003e 'role'::text) = ANY (ARRAY['clinic_admin'::text, 'super_admin'::text])) AND (EXISTS ( SELECT 1\n   FROM clinics\n  WHERE ((clinics.id = shifts.clinic_id) AND (clinics.owner_uid = auth.uid()))))) | check=-
+shifts | SELECT | Authenticated users can view shifts. | roles=public | using=(auth.role() = 'authenticated'::text) | check=-
+shifts | SELECT | Clinic admins can view shifts for their clinic. | roles=public | using=((((auth.jwt() -\u003e 'app_metadata'::text) -\u003e\u003e 'role'::text) = ANY (ARRAY['clinic_admin'::text, 'super_admin'::text])) AND (EXISTS ( SELECT 1\n   FROM clinics\n  WHERE ((clinics.id = shifts.clinic_id) AND (clinics.owner_uid = auth.uid()))))) | check=-
+site_settings | ALL | Admin all access | roles=public | using=true | check=-
+site_settings | SELECT | Public read access | roles=public | using=true | check=-
+support_logs | INSERT | Admins can insert support logs. | roles=public | using=- | check=(EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['clinic_admin'::text, 'super_admin'::text])))))
+support_logs | SELECT | Admins can view all support logs. | roles=public | using=(EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.id = auth.uid()) AND (profiles.role = ANY (ARRAY['clinic_admin'::text, 'super_admin'::text]))))) | check=-
+support_logs | SELECT | Users can view own support logs. | roles=public | using=(auth.uid() = user_id) | check=-

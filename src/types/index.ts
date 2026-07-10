@@ -135,6 +135,29 @@ export interface Booking {
     menuItemId?: string | null;
 }
 
+/**
+ * 公開の予約カレンダー（空き枠表示）専用の型。
+ *
+ * なぜこれがあるか:
+ *   空き枠を出すのに必要なのは「いつ・誰が・埋まっているか」だけで、
+ *   患者さんの氏名・連絡先・症状メモは一切要らない。
+ *   未ログインの人に bookings テーブルをそのまま見せると、
+ *   これらの個人情報まで全部読めてしまう（2026-07-10 の監査で発覚）。
+ *   そこで DB 側に booking_availability というビュー（必要な列だけを映した窓）を作り、
+ *   公開側はこの型だけを扱うようにした。
+ */
+export type BookingSlot = Pick<Booking, 'id' | 'clinicId' | 'staffId' | 'status' | 'startTime' | 'endTime'>;
+
+/** booking_availability ビューの生の行（snake_case のまま） */
+export interface BookingSlotRow {
+    id: string;
+    clinic_id: string;
+    staff_id: string | null;
+    status: Booking['status'];
+    start_time: string;
+    end_time: string;
+}
+
 export interface Shift {
     id: string;
     clinicId?: string; // Optional for now as we might not have it in mock

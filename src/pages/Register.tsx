@@ -1,15 +1,24 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import type { UserRole } from '../types';
 
+/**
+ * 新規登録ページ。
+ *
+ * 【重要な設計判断（2026-07-10 セキュリティ監査）】
+ * 以前はここに「アカウントタイプ」の選択欄があり、誰でも「運営事務局(super_admin)」を
+ * 選んで登録できてしまった。DB 側のトリガーが、その自己申告をそのまま権限にしていたため、
+ * 匿名の第三者が数クリックでプラットフォーム全体の管理者になれる状態だった。
+ *
+ * 現在は「一般ユーザー」で固定。加盟院管理者・運営事務局への昇格は、
+ * 運営が DB 側で手動実施する（docs/security/2026-07-10-緊急修正.sql を参照）。
+ */
 const Register = () => {
     const { register } = useAuth();
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
-    const [role, setRole] = useState<UserRole>('user');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -18,16 +27,15 @@ const Register = () => {
         setError('');
         setLoading(true);
 
-        const { error } = await register(email, password, name, role);
+        // 権限は必ず 'user'。ここで他の値を渡しても DB 側で無視されるが、
+        // 画面からも選ばせない（入口を二重に塞ぐ）。
+        const { error } = await register(email, password, name, 'user');
 
         if (error) {
             setError(error.message);
             setLoading(false);
         } else {
-            // Redirect based on role
-            if (role === 'user') navigate('/');
-            else if (role === 'clinic_admin') navigate('/clinic/dashboard');
-            else if (role === 'super_admin') navigate('/admin/call-center');
+            navigate('/');
         }
     };
 
@@ -74,19 +82,6 @@ const Register = () => {
                             minLength={6}
                         />
                     </div>
-                    <div>
-                        <label className="block text-sm font-bold mb-2">アカウントタイプ</label>
-                        <select
-                            value={role}
-                            onChange={(e) => setRole(e.target.value as UserRole)}
-                            className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:border-primary text-base bg-white"
-                        >
-                            <option value="user">一般ユーザー</option>
-                            <option value="clinic_admin">加盟院管理者</option>
-                            <option value="super_admin">運営事務局</option>
-                        </select>
-                    </div>
-
                     <button
                         type="submit"
                         disabled={loading}

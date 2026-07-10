@@ -11,6 +11,8 @@ import type {
     DiagnosisData,
     ClinicRow,
     BookingRow,
+    BookingSlot,
+    BookingSlotRow,
     ShiftRow,
     ShiftRequestRow,
     AttendanceRecordRow,
@@ -218,8 +220,10 @@ export const checkStaffAvailability = async (clinicId: string, staffId: string, 
     }
 
     // 2. Check Existing Bookings (Overlap)
+    // booking_availability は bookings から個人情報を除いたビュー。
+    // 空き確認に氏名や症状メモは不要なので、未ログインのゲストにも安全に見せられる。
     const { data: conflicts, error: conflictError } = await supabase
-        .from('bookings')
+        .from('booking_availability')
         .select('id')
         .eq('clinic_id', clinicId)
         .eq('staff_id', staffId)
@@ -299,7 +303,14 @@ export const createBooking = async (booking: Omit<Booking, 'id'>) => {
         }
         // -----------------------
 
+        // 予約IDはクライアント側で発行する。
+        // 理由: 挿入後に .select() で行を読み返すと、ゲスト（未ログイン）は
+        //       bookings を読む権限が無いため失敗してしまう。
+        //       先に ID を決めておけば、読み返しは不要になる。
+        const newBookingId = crypto.randomUUID();
+
         const dbData = {
+            id: newBookingId,
             clinic_id: booking.clinicId,
             user_id: booking.userId || null,
             staff_id: finalStaffId, // Use the verified/assigned ID
@@ -315,14 +326,21 @@ export const createBooking = async (booking: Omit<Booking, 'id'>) => {
             menu_item_id: booking.menuItemId
         };
 
-        const { data, error } = await supabase
+        const { error } = await supabase
             .from('bookings')
-            .insert(dbData)
-            .select()
-            .single();
+            .insert(dbData);
 
-        if (error) throw error;
-        return data.id;
+        if (error) {
+            // 23P01 = exclusion_violation。
+            // DB の bookings_no_overlap 制約が「同じスタッフの時間帯が重なる予約」を弾いた合図。
+            // 上の空き確認を通った直後でも、ほぼ同時に別の人が予約するとここに来る（競合状態）。
+            // アプリの確認だけでは防げないダブルブッキングを、DB が最後の砦として止めている。
+            if (error.code === '23P01') {
+                throw new Error('申し訳ありません。ちょうど今、その時間帯が別の方に予約されました。他の時間をお選びください。');
+            }
+            throw error;
+        }
+        return newBookingId;
     } catch (error) {
         console.error("Error creating booking:", error);
         throw error;
@@ -365,6 +383,41 @@ export const updateBooking = async (id: string, updates: Partial<Booking>) => {
     }
 };
 
+/**
+ * 公開の予約カレンダー用。空き枠の判定に必要な列だけを返す。
+ *
+ * この関数を使うと、未ログインの人に患者さんの氏名・連絡先・症状メモを見せずに、
+ * 「その時間は埋まっているか」だけを伝えられる。
+ * 管理画面（院・運営）で個人情報が必要な場合は getClinicBookings を使うこと。
+ */
+export const getPublicBookingAvailability = async (
+    clinicId: string,
+    startDate: Date,
+    endDate: Date
+): Promise<BookingSlot[]> => {
+    const { data, error } = await supabase
+        .from('booking_availability')
+        .select('id, clinic_id, staff_id, status, start_time, end_time')
+        .eq('clinic_id', clinicId)
+        .gte('start_time', startDate.toISOString())
+        .lte('start_time', endDate.toISOString());
+
+    if (error) {
+        console.error('Error fetching booking availability:', error);
+        throw new Error('予約状況の取得に失敗しました。時間をおいて再度お試しください。');
+    }
+
+    return (data as BookingSlotRow[]).map((b) => ({
+        id: b.id,
+        clinicId: b.clinic_id,
+        staffId: b.staff_id,
+        status: b.status,
+        startTime: new Date(b.start_time),
+        endTime: new Date(b.end_time),
+    }));
+};
+
+/** 管理画面（院・運営）専用。個人情報を含む予約の全項目を返す。 */
 export const getClinicBookings = async (clinicId: string, startDate: Date, endDate: Date) => {
     try {
         const { data, error } = await supabase
