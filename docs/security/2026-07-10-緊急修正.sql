@@ -213,16 +213,27 @@ commit;
 
 
 -- ############################################################################
--- Phase 3 — Phase 2 のデプロイ完了後に適用する
+-- Phase 3 — Phase 2 のデプロイ完了後に適用する  【2026-07-10 適用済み】
 -- ############################################################################
--- begin;
+-- 【CRITICAL】全患者の予約（氏名・電話・メール・症状メモ）が匿名で全件読める問題
+-- Phase 1 で作った booking_availability ビューに公開読み取りを移したので、
+-- 本体テーブルの匿名読み取りを遮断する。
 --
--- -- 【CRITICAL】全患者の予約（氏名・電話・メール・症状メモ）が匿名で全件読める問題
--- -- Phase 1 で作った booking_availability ビューに公開読み取りを移したので、
--- -- 本体テーブルの匿名読み取りを遮断する。
--- drop policy if exists "Anyone can view bookings" on public.bookings;
+--   drop policy if exists "Anyone can view bookings" on public.bookings;
 --
--- commit;
+-- 適用後、匿名キーで実際に API を叩いて確認した結果:
+--   bookings（氏名・症状メモ）      → 0 件   ✅ 読めない
+--   profiles（全会員のメール）       → 0 件   ✅ 読めない
+--   booking_availability（空き枠）   → 5 件   ✅ 読める（予約画面が動く）
+--   clinics への更新                 → 0 件   ✅ 一般ユーザーは他院を改変できない
+--   attendance_records の過去分改ざん → 0 件   ✅ 拒否（break_time は 60 のまま）
+--   audit_logs の捏造                → 42501  ✅ 権限不足で拒否
+--
+-- 【適用時に見つかった落とし穴・次回への教訓】
+--   ビューを create しただけだと、Supabase の ALTER DEFAULT PRIVILEGES により
+--   anon/authenticated に INSERT/UPDATE/DELETE 権限まで自動で付く。
+--   更新可能ビュー経由で本体テーブルを書き換えられてしまうため、
+--   必ず `revoke all` してから `grant select` すること（1-2 に反映済み）。
 
 
 -- ============================================================================
