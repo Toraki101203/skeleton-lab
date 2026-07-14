@@ -32,3 +32,6 @@ dist-ssr
 # Claude Code ローカル設定・ループマーカー
 .claude/settings.local.json
 .claude/loop-active
+
+# scope の生成物（回路図HTML）
+.scope/
