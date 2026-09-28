@@ -9,7 +9,7 @@
 - デプロイ: Vercel（vercel.json）
 
 ## 構成メモ
-- ルート直下の *.sql は歴史的な適用済みマイグレーション（`db/migrations-archive/` へ整理予定）。スキーマの正は `supabase_schema.sql`
+- スキーマの正は `supabase_schema.sql`、トリガーは `supabase_triggers.sql`（いずれもルート直下）。適用済みの歴史的マイグレーションは `db/migrations-archive/` に整理済みで、新しい SQL をルートに置かない
 - 予約ステータス遷移（pending → confirmed 等）と RLS が壊れやすい箇所。DB を触る変更は database-reviewer を通す
 
 ## 障害対応
