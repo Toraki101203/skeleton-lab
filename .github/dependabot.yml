@@ -1,0 +1,29 @@
+# このファイルは何をするか（オーナー向けメモ）:
+#   GitHub の Dependabot が、毎週月曜に使っている部品の新しい版・危ない穴を調べ、更新の提案（PR）を作る設定。
+#   小さな更新（パッチ・マイナー）はまとめて1つの PR、壊れうる大きな更新（メジャー）は別の PR で届く。
+#   セキュリティの穴の修正は、この週1回とは別に、見つかり次第すぐに届く。
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Tokyo
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+    commit-message:
+      prefix: "chore(deps)"
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: monthly
+      timezone: Asia/Tokyo
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "chore(ci)"
