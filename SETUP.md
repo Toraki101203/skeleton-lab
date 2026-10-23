@@ -5,14 +5,12 @@
 プロジェクトルートに `.env` ファイルを作成し、以下の内容を記入してください：
 
 ```env
-# Firebase Configuration
-VITE_FIREBASE_API_KEY=your-api-key-here
-VITE_FIREBASE_AUTH_DOMAIN=your-project-id.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=your-project-id
-VITE_FIREBASE_STORAGE_BUCKET=your-project-id.appspot.com
-VITE_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
-VITE_FIREBASE_APP_ID=your-app-id
+# Supabase の設定（値は Supabase ダッシュボード → Project Settings → API で確認）
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key-here
 ```
+
+（`.env.example` をコピーして使えます。Firebase は使っていないため設定不要です）
 
 ## インストール
 
@@ -32,11 +30,11 @@ npm run dev
 npm run build
 ```
 
-## Firebase設定
+## Supabase設定
 
-1. [Firebase Console](https://console.firebase.google.com/)でプロジェクトを作成
-2. プロジェクト設定から上記の環境変数を取得
-3. `.env`ファイルに設定
+1. [Supabase](https://supabase.com/dashboard) でプロジェクトを作成
+2. Project Settings → API から上記の URL と anon key を取得
+3. `.env` ファイルに設定
 
 ## 主な機能
 
