@@ -34,7 +34,7 @@ Vercelは設定が簡単で、Vite製のReactアプリと相性が抜群です�
 
 ## 方法 2: Firebase Hosting で公開する
 
-すでにFirebaseを使用しているため、Firebase Hostingを使うのも自然な選択です。
+（注: アプリ本体は Supabase を使っており Firebase には依存していません。静的ファイルの置き場所として Firebase Hosting を使う場合の手順です）
 
 ### 手順
 
